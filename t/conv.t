@@ -2,7 +2,7 @@ use warnings;
 use strict;
 use Math::Decimal64 qw(:all);
 
-print "1..10\n";
+print "1..11\n";
 
 my $check2 = Math::Decimal64->new(10, 0);
 my $add    = Math::Decimal64->new(1, -2);
@@ -148,6 +148,15 @@ if($man eq '8069610750070607' && $exp == 1) {print "ok 10\n"}
 else {
   warn "\$man: $man \$exp: $exp\n";
   print "not ok 10\n";
+}
+
+# Failed on my powerpc box
+$d64_1 = Math::Decimal64->new('897', -292);
+($man, $exp) = D64toME($d64_1);
+if($man eq '897' && $exp == -292) {print "ok 11\n"}
+else {
+  warn "\$man: $man \$exp: $exp\n";
+  print "not ok 11\n";
 }
 
 
