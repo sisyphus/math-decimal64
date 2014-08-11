@@ -150,7 +150,7 @@ else {
   print "not ok 10\n";
 }
 
-# Failed on my powerpc box
+# Fails on my powerpc box - a bug in the compiler/libc print formatting (sprintf).
 $d64_1 = Math::Decimal64->new('897', -292);
 ($man, $exp) = D64toME($d64_1);
 if($man eq '897' && $exp == -292) {print "ok 11\n"}
