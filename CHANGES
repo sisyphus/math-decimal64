@@ -3,6 +3,7 @@
    version that doesn't provide the Math::MPFR::_MPFR_WANT_DECIMAL_FLOATS function.
  - Define PERL_NO_GET_CONTEXT.
  - Add metadata to Makefile.PL.
+ - Work around compiler/libc bug in handling of the value 897e-292. (Affects PPC only.)
 
 0.05
  - Fix D64toME() so that it works correctly on powerpc processors.
