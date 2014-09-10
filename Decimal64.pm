@@ -25,6 +25,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
+    get_sign get_exp
     );
 
 %Math::Decimal64::EXPORT_TAGS = (all => [qw(
@@ -34,6 +35,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
+    get_sign get_exp
     )]);
 
 use overload
@@ -578,7 +580,7 @@ sub decode_bid {
   if($pre eq '00' || $pre eq '01' || $pre eq '10') {
     $exp = oct('0b' . substr($keep, 1, 10)) - 398;
     @mantissa =  reverse(split(//, '0' . substr($keep, 11, 53)));
-    my $mantissa = bir_mant(\@mantissa);
+    my $mantissa = _bid_mant(\@mantissa);
     if($mantissa !~ /[1-9]/) { $mantissa = '0'}
     else {
       while($mantissa =~ /0$/) {
@@ -592,7 +594,7 @@ sub decode_bid {
   if($pre eq '1100' || $pre eq '1101' || $pre eq '1110') {
     $exp = oct('0b' . substr($keep, 3, 10)) - 398;
     @mantissa = reverse(split(//,'100' . substr($keep, 13, 51)));
-    my $mantissa = bir_mant(\@mantissa);
+    my $mantissa = _bid_mant(\@mantissa);
     if($mantissa !~ /[1-9]/) { $mantissa = '0'}
     else {
       while($mantissa =~ /0$/) {
@@ -620,6 +622,32 @@ sub hex2bin {
 sub DEC64_MAX {return _DEC64_MAX()}
 sub DEC64_MIN {return _DEC64_MIN()}
 
+sub get_exp {
+  my $keep = hex2binl(d128_bytes($_[0]));
+  my $pre = substr($keep, 1, 2);
+  if(d128_fmt() eq 'DPD') {
+    if($pre eq '00' || $pre eq '01' || $pre eq '10') {
+      return oct('0b' . $pre . substr($keep, 6, 8)) - 398;
+    }
+    else {
+      return oct('0b' . substr($pre, 2, 2) . substr($keep, 6, 8)) - 398;
+    }
+  }
+  else {
+    if($pre eq '00' || $pre eq '01' || $pre eq '10') {
+      return oct('0b' . substr($keep, 1, 10)) - 398;
+    }
+    else {
+      return oct('0b' . substr($keep, 3, 10)) - 398;
+    }
+  }
+}
+
+sub get_sign {
+  return '-' if hex(substr(d128_bytes($_[0]), 0, 1)) >= 8;
+  return '+';
+}
+
 *decode_d64 = d64_fmt() eq 'DPD' ? \&decode_dpd : \&decode_bid;
 
 1;
@@ -628,7 +656,7 @@ __END__
 
 =head1 NAME
 
-Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
+Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
 =head1 DEPENDENCIES
 
@@ -636,13 +664,6 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
    the _Decimal64 type is needed.
 
 =head1 DESCRIPTION
-
-   Note that this module is alpha software. It seems to work ok
-   for me on Windows 7 (Intel processor,compiling with gcc-4.6.3,
-   gcc-4.7.0) and Ubuntu-12.04LTS (Amd64 processor, gcc-4.6.3).
-
-   It also works for me on Debian wheezy (PowerpC processor,
-   gcc-4.6.3) apart from caveats mentioned in the docs below.
 
    Math::Decimal64 supports up to 16 decimal digits of significand
    (mantissa) and an exponent range of -383 to +384.
@@ -660,19 +681,6 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
    holding a string of up to 16 decimal digits:
     $mantissa = '1234';
     $mantissa = '1234567890123456';
-
-   For many values, it normally shouldn't matter if $mantissa is
-   assigned as a number:
-    $mantissa = 1234;      # should work ok.
-
-   But on some perls there are values that *need* to be assigned
-   as a string. For example, on perls where nvtype is an 8 byte
-   'double':
-    $mantissa = '-9307199254740993'; # works fine
-    $mantissa = -9307199254740993;   # will assign wrong value
-
-   So ... where you see "$mantissa" in the following docs, think
-   *string* of up to 16 decimal digits".
 
 =head1 SYNOPSIS
 
@@ -695,14 +703,6 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
 
     Arguments to the overloaded operations must be Math::Decimal64
     objects or integer (IV/UV) values.
-
-    If your perl has 8-byte (or larger) IV/UV, then you may get
-    unexpected results if you pass an IV/UV to the overloaded
-    operators (because the precision of the IV/UV exceeds the
-    precision of the _Decimal64 type) - it depends upon just how
-    big the absolute value of the IV/UV is.
-
-     $d64_2 = $d64_1 + 15; # ok
 
      $d64_2 = $d64_1 + 3.1; # Error. Best to either:
      $d64_2 = $d64_1 + MEtoD64('31',-1); # or (equivalentally):
@@ -745,13 +745,6 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
       assign using PVtoD64().
       This assigns using the C standard library function strtold(),
       and then casting to a _Decimal64.
-      It is significantly faster than MEtoD64 for exponents outside
-      the range (-10 .. 10) and I think it is reliable so long as:
-       1) the 'long double' type has precision of 55 bits or more;
-       2) the 'long double' type accommodates the _Decimal64 type's
-          exponent range;
-       3) Any (and all) digits after the mantissa's 16th digit
-          are '0'.
 
      #####################################
      # Assign from a UV (unsigned integer)
@@ -761,11 +754,7 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
 
       Doing Math::Decimal64->new($uv) will also create and assign
       using UVtoD64().
-      On perls where the UV is 8 bytes or larger, the precision of
-      the UV exceeds the precision of the _Decimal64 - and this
-      function is not therefore recommended on such perls (unless
-      you're sure the UV value won't be subject to rounding).
-      Check the size of the UV by running perl -V:ivsize
+      Assigns the designated UV value to the Math::Decimal64 object.
 
      ####################################
      # Assign from an IV (signed integer)
@@ -775,11 +764,7 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
 
       Doing Math::Decimal64->new($iv) will also create and assign
       using IVtoD64().
-      On perls where the IV is 8 bytes or larger, the precision of
-      the UV exceeds the precision of the _Decimal64 - and this
-      function is not therefore recommended on such perls (unless
-      you're sure the IV value won't be subject to rounding).
-      Check the size of the IV by running perl -V:ivsize
+      Assigns the designated IV value to the Math::Decimal64 object.
 
      ################################################
      # Assign from an existing Math::Decimal64 object
@@ -827,17 +812,12 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
       Assigns the value represented by ($mantissa, $exponent)
       to the Math::Decimal64 object, $d64.
       Performs same argument checking as MEtoD64.
-      Same caveats apply here as to MEtoD64 - see the MEtoD64
-      documentation.
 
       eg: assignME($d64, '123459', -6); # 0.123459
 
      assignPV($d64, $string);
       Assigns the value represented by $string to the
       Math::Decimal64 object, $d64.
-      Doesn't check to see what $string contains.
-      Same caveats apply here as to PVtoD64() - see the PVtoD64
-      documentation (above).
 
       eg: assignPV($d64, '123459e-6'); # 0.123459
 
@@ -991,6 +971,16 @@ Math::Decimal64 - (alpha) perl interface to C's _Decimal64 operations.
      objects - done by simply casting the long double value to a
      _Decimal64 value, or (resp.) vice-versa.
      Requires that Math::LongDouble has been loaded.
+
+     $sign = get_sign($d64);
+      Returns the sign ('+' or '-') of $d64.
+
+     $exp = get_exp($d64);
+      Returns the exponent of $d64. This is the value that's
+      stored internally within the encapsulated _Decimal64 value;
+      it may differ from the value that you assigned. For example,
+      if you've assigned the value MEtoD64('100', 0) it will
+      probably be held internally as '1e2', not '100e0'.
 
 =head1 LICENSE
 
