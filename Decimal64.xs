@@ -218,14 +218,30 @@ SV * Exp10(pTHX_ int power) {
 
      *d64 = 1.0DD;
      if(power < 0) {
+       while(power < -100) {
+         *d64 *= 1e-100DL;
+         power += 100;
+       }
+       while(power < -10) {
+         *d64 *= 1e-10DL;
+         power += 10;
+       }
        while(power) {
-         *d64 *= 0.1DD;
+         *d64 *= 1e-1DL;
          power++;
        }
      }
      else {
+       while(power > 100) {
+         *d64 *= 1e100DL;
+         power -= 100;
+       }
+       while(power > 10) {
+         *d64 *= 1e10DL;
+         power -= 10;
+       }
        while(power) {
-         *d64 *= 10.0DD;
+         *d64 *= 1e1DL;
          power--;
        }
      }
@@ -1160,7 +1176,7 @@ void _d64_bytes(pTHX_ SV * sv) {
   XSRETURN(n);
 }
 
-void bir_mant(pTHX_ SV * bin) {
+void _bid_mant(pTHX_ SV * bin) {
   dXSARGS;
   int i, imax = av_len((AV*)SvRV(bin));
   char * buf;
@@ -1761,13 +1777,13 @@ _d64_bytes (sv)
         return; /* assume stack size is correct */
 
 void
-bir_mant (bin)
+_bid_mant (bin)
 	SV *	bin
         PREINIT:
         I32* temp;
         PPCODE:
         temp = PL_markstack_ptr++;
-        bir_mant(aTHX_ bin);
+        _bid_mant(aTHX_ bin);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
