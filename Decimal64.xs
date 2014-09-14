@@ -21,6 +21,19 @@
 #  define Newx(v,n,t) New(0,v,n,t)
 #endif
 
+typedef _Decimal64 D64;
+
+long long add_on[54] = {1ll,2ll, 4ll, 8ll, 16ll, 32ll, 64ll, 128ll, 256ll, 512ll, 1024ll, 2048ll,
+                        4096ll, 8192ll, 16384ll, 32768ll, 65536ll, 131072ll, 262144ll, 524288ll,
+                        1048576ll, 2097152ll, 4194304ll, 8388608ll, 16777216ll, 33554432ll,
+                        67108864ll, 134217728ll, 268435456ll, 536870912ll, 1073741824ll,
+                        2147483648ll,  4294967296ll, 8589934592ll, 17179869184ll, 34359738368ll,
+                        68719476736ll, 137438953472ll, 274877906944ll, 549755813888ll,
+                        1099511627776ll, 2199023255552ll, 4398046511104ll, 8796093022208ll,
+                        17592186044416ll, 35184372088832ll, 70368744177664ll, 140737488355328ll,
+                        281474976710656ll, 562949953421312ll, 1125899906842624ll, 2251799813685248ll,
+                        4503599627370496ll, 9007199254740992ll};
+
 int  _is_nan(_Decimal64 x) {
      if(x == x) return 0;
      return 1;
@@ -207,8 +220,11 @@ SV * Exp10(pTHX_ int power) {
      _Decimal64 * d64;
      SV * obj_ref, * obj;
 
+/*
+     Remove this condition - and let the value be set to 0 or Inf
      if(power < -398 || power > 384)
        croak("Argument supplied to Exp10 function (%d) is out of allowable range", power);
+*/
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in Exp10 function");
@@ -353,6 +369,8 @@ SV * IVtoD64(pTHX_ SV * x) {
      return obj_ref;
 }
 
+/*
+Currently using perl sub of the same name.
 SV * PVtoD64(pTHX_ char * x) {
      _Decimal64 * d64;
      long double temp;
@@ -373,6 +391,7 @@ SV * PVtoD64(pTHX_ char * x) {
      SvREADONLY_on(obj);
      return obj_ref;
 }
+*/
 
 SV * STRtoD64(pTHX_ char * x) {
 #ifdef STRTOD64_AVAILABLE
@@ -453,12 +472,16 @@ void _assignME(pTHX_ SV * a, char * mantissa, SV * c) {
      }
 }
 
+/*
+Currently using perl sub of the same name
+
 void assignPV(pTHX_ SV * a, char * str) {
      char * ptr;
      long double man = strtold(str, &ptr);
 
      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = (_Decimal64)man;
 }
+*/
 
 void assignNaN(pTHX_ SV * a) {
 
@@ -1158,7 +1181,7 @@ void _d64_bytes(pTHX_ SV * sv) {
   void * p = &d64;
 
   Newx(buff, 4, char);
-  if(buff == NULL) croak("Failed to allocate meemory in _d64_bytes function");
+  if(buff == NULL) croak("Failed to allocate memory in _d64_bytes function");
 
   sp = mark;
 
@@ -1181,16 +1204,7 @@ void _bid_mant(pTHX_ SV * bin) {
   int i, imax = av_len((AV*)SvRV(bin));
   char * buf;
   long long val = 0ll;
-  long long add_on[54] = {1ll,2ll, 4ll, 8ll, 16ll, 32ll, 64ll, 128ll, 256ll, 512ll, 1024ll, 2048ll,
-                          4096ll, 8192ll, 16384ll, 32768ll, 65536ll, 131072ll, 262144ll, 524288ll,
-                          1048576ll, 2097152ll, 4194304ll, 8388608ll, 16777216ll, 33554432ll,
-                          67108864ll, 134217728ll, 268435456ll, 536870912ll, 1073741824ll,
-                          2147483648ll,  4294967296ll, 8589934592ll, 17179869184ll, 34359738368ll,
-                          68719476736ll, 137438953472ll, 274877906944ll, 549755813888ll,
-                          1099511627776ll, 2199023255552ll, 4398046511104ll, 8796093022208ll,
-                          17592186044416ll, 35184372088832ll, 70368744177664ll, 140737488355328ll,
-                          281474976710656ll, 562949953421312ll, 1125899906842624ll, 2251799813685248ll,
-                          4503599627370496ll, 9007199254740992ll};
+  extern long long add_on[54];
 
   Newx(buf, 20, char);
   if(buf == NULL) croak("Failed to allocate memory in bir_mant function");
@@ -1217,7 +1231,51 @@ SV * _endianness(pTHX) {
 #endif
 }
 
+SV * _DPDtoD64(pTHX_ char * in) {
+  D64 * d64;
+  SV * obj_ref, * obj;
+  int i, n = sizeof(D64);
+  D64 out = 0.;
+  void *p = &out;
 
+  Newx(d64, 1, D64);
+  if(d64 == NULL) croak("Failed to allocate memory in DPDtoD64 function");
+
+  obj_ref = newSV(0);
+  obj = newSVrv(obj_ref, "Math::Decimal64");
+
+  for (i = n - 1; i >= 0; i--)
+#ifdef WE_HAVE_BENDIAN
+    ((unsigned char*)p)[i] = in[i];
+#else
+    ((unsigned char*)p)[i] = in[n - 1 - i];
+#endif
+
+  *d64 = out;
+
+  sv_setiv(obj, INT2PTR(IV,d64));
+  SvREADONLY_on(obj);
+  return obj_ref;
+}
+
+/*
+   _assignDPD takes 2 args: a Math::Decimal64 object, and a
+   string that encodes the value to be assigned to that object
+*/
+void _assignDPD(pTHX_ SV * a, char * in) {
+  int i, n = sizeof(D64);
+  D64 out = 0.;
+  void *p = &out;
+
+  for (i = n - 1; i >= 0; i--)
+#ifdef WE_HAVE_BENDIAN
+    ((unsigned char*)p)[i] = in[i];
+#else
+    ((unsigned char*)p)[i] = in[n - 1 - i];
+#endif
+
+  *(INT2PTR(D64 *, SvIV(SvRV(a)))) = out;
+}
 
 
 MODULE = Math::Decimal64  PACKAGE = Math::Decimal64
@@ -1332,13 +1390,6 @@ CODE:
 OUTPUT:  RETVAL
 
 SV *
-PVtoD64 (x)
-	char *	x
-CODE:
-  RETVAL = PVtoD64 (aTHX_ x);
-OUTPUT:  RETVAL
-
-SV *
 STRtoD64 (x)
 	char *	x
 CODE:
@@ -1416,23 +1467,6 @@ _assignME (a, mantissa, c)
         PPCODE:
         temp = PL_markstack_ptr++;
         _assignME(aTHX_ a, mantissa, c);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
-
-void
-assignPV (a, str)
-	SV *	a
-	char *	str
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        assignPV(aTHX_ a, str);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
@@ -1798,4 +1832,28 @@ CODE:
   RETVAL = _endianness (aTHX);
 OUTPUT:  RETVAL
 
+
+SV *
+_DPDtoD64 (in)
+	char *	in
+CODE:
+  RETVAL = _DPDtoD64 (aTHX_ in);
+OUTPUT:  RETVAL
+
+void
+_assignDPD (a, in)
+	SV *	a
+	char *	in
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        _assignDPD(aTHX_ a, in);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
 
