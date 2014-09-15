@@ -11,14 +11,6 @@ if(d64_fmt() eq 'DPD') {
   exit 0;
 }
 
-sub random_select {
-  my $ret = '';
-  for(1 .. $_[0]) {
-    $ret .= int(rand(10));
-  }
-  return "$ret";
-}
-
 print "1..$t\n";
 
 my $ok = 1;
@@ -29,6 +21,7 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     $man =~ s/^0+//;
     $man ||= '0';
     my $d64 = MEtoD64($man, $exp);
+    my $d64_orig = $d64;
     my($s, $e) = (get_sign($d64), get_exp($d64));
 
     if($s ne '+') {
@@ -36,13 +29,9 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
       warn "Wrong sign ($s) for ($man, $exp)\n";
     }
 
-    my $d64_2 = $d64 * Exp10(-$e);
+    $d64 *= Exp10(-$e);
 
-    if(get_exp($d64_2)) {
-      warn "$d64_2 $d64: Exponent not set to zero (", get_exp($d64_2), ") for ($man, $exp)\n";
-    }
-
-    my $check = Math::Decimal64::_decode_mant($d64_2);
+    my $check = Math::Decimal64::_decode_mant($d64);
     $check =~ s/^0+//;
 
 
@@ -60,6 +49,12 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
       warn "\$man ($man) returned as ", $s . $check, "(\$s . \$check)\n";
     }
 
+    my $d64_new = MEtoD64($s . $check, $e);
+    if($d64_new != $d64_orig) {
+      $ok = 0;
+      warn "\n \$d64_orig: $d64_orig\n \$d64_new: $d64_new\n";
+    }
+
   }
 }
 
@@ -74,6 +69,7 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     $man ||= '0';
     $man = '-' . $man;
     my $d64 = MEtoD64($man, $exp);
+    my $d64_orig = $d64;
     my($s, $e) = (get_sign($d64), get_exp($d64));
 
     if($s ne '-') {
@@ -82,10 +78,6 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     }
 
     $d64 *= Exp10(-$e);
-
-    if(get_exp($d64)) {
-      warn "Exponent not set to zero (", get_exp($d64), ") for ($man, $exp) $d64\n";
-    }
 
     my $check = Math::Decimal64::_decode_mant($d64 * UnityD64(-1));
     $check =~ s/^0+//;
@@ -104,6 +96,12 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
       warn "\$man ($man) returned as ", $s . $check, "(\$s . \$check)\n";
     }
 
+    my $d64_new = MEtoD64($s . $check, $e);
+    if($d64_new != $d64_orig) {
+      $ok = 0;
+      warn "\n \$d64_orig: $d64_orig\n \$d64_new: $d64_new\n";
+    }
+
   }
 }
 
@@ -117,6 +115,7 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     $man =~ s/^0+//;
     $man ||= '0';
     my $d64 = MEtoD64($man, -$exp);
+    my $d64_orig = $d64;
     my($s, $e) = (get_sign($d64), get_exp($d64));
 
     if($s ne '+') {
@@ -125,10 +124,6 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     }
 
     $d64 *= Exp10(-$e);
-
-    if(get_exp($d64)) {
-      warn "Exponent not set to zero (", get_exp($d64), ") for ($man, $exp)\n";
-    }
 
     my $check = Math::Decimal64::_decode_mant($d64);
     $check =~ s/^0+//;
@@ -147,6 +142,12 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
       warn "\$man ($man) returned as ", $s . $check, "(\$s . \$check)\n";
     }
 
+    my $d64_new = MEtoD64($s . $check, $e);
+    if($d64_new != $d64_orig) {
+      $ok = 0;
+      warn "\n \$d64_orig: $d64_orig\n \$d64_new: $d64_new\n";
+    }
+
   }
 }
 
@@ -161,6 +162,7 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     $man ||= '0';
     $man = '-' . $man;
     my $d64 = MEtoD64($man, -$exp);
+    my $d64_orig = $d64;
     my($s, $e) = (get_sign($d64), get_exp($d64));
 
     if($s ne '-') {
@@ -169,10 +171,6 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
     }
 
     $d64 *= Exp10(-$e);
-
-    if(get_exp($d64)) {
-      warn "Exponent not set to zero (", get_exp($d64), ") for ($man, $exp)\n";
-    }
 
     my $check = Math::Decimal64::_decode_mant($d64 * UnityD64(-1));
     $check =~ s/^0+//;
@@ -191,11 +189,16 @@ for my $exp(0..10, 20, 30, 350 .. 360) {
       warn "\$man ($man) returned as ", $s . $check, "(\$s . \$check)\n";
     }
 
+    my $d64_new = MEtoD64($s . $check, $e);
+    if($d64_new != $d64_orig) {
+      $ok = 0;
+      warn "\n \$d64_orig: $d64_orig\n \$d64_new: $d64_new\n";
+    }
+
   }
 }
 
 $ok ? print "ok 4\n" : print "not ok 4\n";
-
 
 sub random_select {
   my $ret = '';
