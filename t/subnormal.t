@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use Math::Decimal64 qw(:all);
 
-print "1..10\n";
+print "1..11\n";
 
 my $str = '5' x16; # 5555555555555555
 my $str_copy = $str;
@@ -84,4 +84,12 @@ if(MEtoD64($str, -414) == MEtoD64( '0', -398)) {print "ok 10\n"}
 else {
   warn "\n          $str\n Got      ", MEtoD64($str, -414), "\n Expected 0\n";
   print "not ok 10\n";
+}
+
+$str = '54' . ('9' x 14);
+
+if(MEtoD64($str, -413) == MEtoD64( '5', -398)) {print "ok 11\n"}
+else {
+  warn "\n          $str\n Got      ", MEtoD64($str, -413), "\n Expected 6e-398\n";
+  print "not ok 11\n";
 }
