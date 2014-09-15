@@ -22,6 +22,7 @@ t/overload_spaceship.t
 t/pod.t
 t/reassign.t
 t/strtod64.t
+t/subnormal.t
 t/UV_arith.t
 t/UV_cmp.t
 t/PVtoD64.t
