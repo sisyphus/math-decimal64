@@ -532,8 +532,8 @@ sub MEtoD64 {
 #######################################################################
 #######################################################################
 
-# Values such as (d, -399), (dd, -400), (ddd, -401), etc evaluate to zero.
-# But values such as (dddd, -399), (ddd, -400), (dddddddd, -401), etc are non-zero.
+# Values such as (d, -400), (dd, -401), (ddd, -402), etc evaluate to zero.
+# But values such as (dddd, -400), (ddd, -401), (dddddddd, -402), etc may be non-zero.
 # In such cases we'll remove the ignored (trailing) digits, rounding the leading
 # digits to nearest - tied to even for midway cases.
 
@@ -705,7 +705,7 @@ sub decode_dpd_2nd {
   my $ret = '';
   for my $i(0, 10, 20, 30, 40) {
     my $key = substr($keep, $i, 10);
-    $ret .= $Math::Decimal64::dpd_correlation{$key};
+    $ret .= $Math::Decimal64::dpd_encode{$key};
   }
   return $ret;
 }
@@ -897,9 +897,9 @@ sub _MEtoBINSTR {
   # the need to actually calculate the value.
   my $man = shift;
   if($man =~ /^(\-|\+)?inf|^(\-|\+)?nan/i) {
-     $man =~ /\-inf/i ? return '11111' . ('0' x 123)
-                      : $man =~ /^(\-|\+)?nan/i ? return '011111' . ('0' x 122)
-                                                : return '01111'  . ('0' x 123);
+     $man =~ /\-inf/i ? return '11111' . ('0' x 59)
+                      : $man =~ /^(\-|\+)?nan/i ? return '011111' . ('0' x 58)
+                                                : return '01111'  . ('0' x 59);
   }
 
   my $exp = shift;
@@ -910,23 +910,37 @@ sub _MEtoBINSTR {
   die "_MEtoBINSTR has been passed (probably from DPDtoBINSTR) an illegal mantissa"
     if $man =~ /[^0-9]/;
 
-  # Fill the mantissa with 34 digits - by zero padding the end.
-  my $add_zeroes = 34 - length($man);
-  $man .= '0' x $add_zeroes;
-  $exp -= $add_zeroes;
+  my $no_padding = 0;
 
-  # The last 110 bits encode the last 33 digits.
-  my $last_33_dig = substr($man, 1, 33);
-  my $last_110_bits;
-  for(my $i = 0; $i < 31; $i += 3) {
-    $last_110_bits .= $Math::Decimal64::dpd_decode{substr($last_33_dig, $i, 3)}
+  if(length($man) > 16 || $exp < -398) {
+    die "$man exceeds _Decimal64 precision. It needs to be shortened to no more than 16 decimal digits"
+      if length($man) > 16;
+    ($man, $exp) = _round_as_needed($man, $exp);
+    $no_padding = 1;
   }
 
-  my $len = length($last_110_bits);
-  die "Wrong bitsize ($len != 110) in MEtoBINSTR()" if $len != 110;
+  # Fill the mantissa with 16 digits - by zero padding the end (unless $no_padding has been set).
+  unless($no_padding) {
+    my $add_zeroes = 16 - length($man);
+    $man .= '0' x $add_zeroes;
+    $exp -= $add_zeroes;
+  }
+
+  # Return 0 if $exp is still less that -398.
+  return $sign . '011000110100000000000000000000000000000000000000000000000000000' if $exp < -398;
+
+  # The last 50 bits encode the last 15 digits.
+  my $last_15_dig = substr($man, 1, 15);
+  my $last_50_bits;
+  for(my $i = 0; $i < 13; $i += 3) {
+    $last_50_bits .= $Math::Decimal64::dpd_decode{substr($last_15_dig, $i, 3)}
+  }
+
+  my $len = length($last_50_bits);
+  die "Wrong bitsize ($len != 50) in _MEtoBINSTR()" if $len != 50;
 
   my $leading_digit = substr($man, 0, 1); # ie the msd (most siginificant digit).
-  my $exp_base_2 = sprintf "%014b", $exp + 6176;
+  my $exp_base_2 = sprintf "%010b", $exp + 398;
 
   # The encoding of the exponent and msd depends upon the value of the msd.
   # If it's 0..7, it's done one way; if it's 8 or 9 it's done th'other way.
@@ -936,13 +950,13 @@ sub _MEtoBINSTR {
   }
   else {
     my $leading_digit_bit = $leading_digit == 8 ? '0' : '1';
-    $exp_base_2 = '11' . substr($exp_base_2, 0, 2) . $leading_digit_bit . substr($exp_base_2, 2, 12);
+    $exp_base_2 = '11' . substr($exp_base_2, 0, 2) . $leading_digit_bit . substr($exp_base_2, 2, 8);
   }
 
   $len = length($exp_base_2);
-  die "Exponent component length is wrong ($len != 17) in MEtoBINSTR()" if $len != 17;
+  die "Exponent (= $exp) component length is wrong ($len != 13) in _MEtoBINSTR()" if $len != 13;
 
-  return $sign . $exp_base_2 . $last_110_bits;
+  return $sign . $exp_base_2 . $last_50_bits;
 }
 
 #######################################################################
