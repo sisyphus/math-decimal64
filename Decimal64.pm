@@ -533,36 +533,36 @@ sub MEtoD64 {
 #######################################################################
 
 # Values such as (d, -399), (dd, -400), (ddd, -401), etc evaluate to zero.
-# But values such (dddd, -399), (ddd, -400), (dddddddd, -401), etc are non-zero.
-# In such cases we'll round the leading digits as needed - tied to even for
-# midway cases.
+# But values such as (dddd, -399), (ddd, -400), (dddddddd, -401), etc are non-zero.
+# In such cases we'll remove the ignored (trailing) digits, rounding the leading
+# digits to nearest - tied to even for midway cases.
 
 sub _round_as_needed {
-   my($arg1, $arg2, $sign) = (shift, shift, '');
+   my($sign, $man, $exp) = ('', shift, shift);
 
-   if($arg1 =~ /^\-/) {
-     $arg1 =~ s/^\-//;
+   if($man =~ /^\-/) {
+     $man =~ s/^\-//;
      $sign = '-';
    }
 
-   my $length = length $arg1;
-   my $maxlen = -398 - $arg2;
+   my $length = length $man;
+   my $maxlen = -398 - $exp;
 
    if($length >= $maxlen) {
-     my $rounder = substr($arg1, $length - $maxlen);
-     $arg1 = $length > $maxlen ? substr($arg1, 0, $length - $maxlen)
+     my $rounder = substr($man, $length - $maxlen); # The trailing (ignored) digits
+     $man = $length > $maxlen ? substr($man, 0, $length - $maxlen)
                                : '0';
      my $roundup = 0;
      $roundup = 1 if substr($rounder, 0, 1) > 5;
-     $roundup = 1 if ((substr($rounder, 0, 1) == 5) && (substr($rounder, 1) =~ /[1-9]/));
-     $roundup = 1 if ((substr($rounder, 0, 1) == 5) && (substr($arg1, -1, 1) %2 == 1));
+     $roundup = 1 if ((substr($rounder, 0, 1) == 5) &&
+                      ((substr($rounder, 1) =~ /[1-9]/) || (substr($man, -1, 1) %2 == 1)));
 
-
-     $arg1++ if $roundup;
-     $arg2 += $maxlen;
+     $man++ if $roundup;
+     $exp += $maxlen; # Removal of trailing digits moved the implied
+                       # decimal point $maxlen places to the left
    }
 
-   return ($sign . $arg1, $arg2);
+   return ($sign . $man, $exp);
 }
 
 #######################################################################
