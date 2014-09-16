@@ -72,12 +72,16 @@ my $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = '-' . random_select($digits);
+    my($mano, $expo) = ($man, -$exp);
     my $d64 = MEtoD64($man, -$exp);
+    my @me_redone = ($man, -$exp);
     assignDPD($rop, $man, -$exp);
-    #my $check = PVtoD64($man . 'e' . -$exp);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -89,12 +93,16 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = random_select($digits);
+    my($mano, $expo) = ($man, $exp);
     my $d64 = MEtoD64($man, $exp);
+    my @me_redone = ($man, $exp);
     assignDPD($rop, $man, $exp);
-    #my $check = PVtoD64($man . 'E' . $exp);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -106,12 +114,17 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = '-' . random_select($digits);
+    my($mano, $expo) = ($man, $exp);
     my $d64 = MEtoD64($man, $exp);
+    my @me_redone = ($man, $exp);
     assignDPD($rop, $man, $exp);
     #my $check = PVtoD64($man . 'E' . $exp);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -123,12 +136,16 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = random_select($digits);
+    my($mano, $expo) = ($man, -$exp);
     my $d64 = MEtoD64($man, -$exp);
+    my @me_redone = ($man, -$exp);
     assignDPD($rop, $man, -$exp);
-    #my $check = PVtoD64($man . 'e' . -$exp);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -140,13 +157,16 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = '-' . random_select($digits);
+    my($mano, $expo) = ($man, -$exp);
     my $d64 = MEtoD64($man, -$exp);
-    #my $mod = me2pv($man, -$exp);
+    my @me_redone = ($man, -$exp);
     assignDPD($rop, $man, -$exp);
-    #my $check = PVtoD64($mod);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -158,13 +178,16 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = random_select($digits);
+    my($mano, $expo) = ($man, $exp);
     my $d64 = MEtoD64($man, $exp);
-    #my $mod = me2pv($man, $exp);
+    my @me_redone = ($man, $exp);
     assignDPD($rop, $man, $exp);
-    #my $check = PVtoD64($mod);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -176,13 +199,16 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = '-' . random_select($digits);
+    my($mano, $expo) = ($man, $exp);
     my $d64 = MEtoD64($man, $exp);
-    #my $mod = me2pv($man, $exp);
+    my @me_redone = ($man, $exp);
     assignDPD($rop, $man, $exp);
-    #my $check = PVtoD64($mod);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
@@ -194,13 +220,16 @@ $ok = 1;
 for my $exp(0..10, 20, 30, 280, 350 .. 415) {
   for my $digits(1..16) {
     my $man = random_select($digits);
+    my($mano, $expo) = ($man, -$exp);
     my $d64 = MEtoD64($man, -$exp);
-    #my $mod = me2pv($man, -$exp);
+    my @me_redone = ($man, -$exp);
     assignDPD($rop, $man, -$exp);
-    #my $check = PVtoD64($mod);
     if($rop != $d64) {
       $ok = 0;
-      warn "\n  MEtoD64: $d64\n  PVtoD64: $rop\n";
+      my @me = ($mano, $expo);
+      my $binstr1 = hex2bin(d64_bytes($d64));
+      my $binstr2 = Math::Decimal64::_MEtoBINSTR(@me_redone);
+      warn "\n  (@me) (@me_redone)\n  MEtoD64: $d64\n  assignDPD: $rop\n $binstr1\n $binstr2\n";
     }
   }
 }
