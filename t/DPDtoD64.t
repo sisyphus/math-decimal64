@@ -80,8 +80,8 @@ exit 0 if d64_fmt() eq 'BID';
 
 my $ok = 1;
 
-for my $exp(0..10, 20, 30, 280 .. 300, 6090..6100) {
-  for my $digits(1..34) {
+for my $exp(0..10, 20, 30, 350 .. 430) {
+  for my $digits(1..16) {
     my $man = '-' . random_select($digits);
     my $d64 = MEtoD64($man, -$exp);
     my $check = DPDtoD64($man, -$exp);
@@ -96,8 +96,8 @@ $ok ? print "ok 10\n" : print "not ok 10\n";
 
 $ok = 1;
 
-for my $exp(0..10, 20, 30, 280 .. 300, 6090..6100) {
-  for my $digits(1..34) {
+for my $exp(0..10, 20, 30, 350 .. 430) {
+  for my $digits(1..16) {
     my $man = random_select($digits);
     my $d64 = MEtoD64($man, $exp);
     my $check = DPDtoD64($man, $exp);
@@ -112,8 +112,8 @@ $ok ? print "ok 11\n" : print "not ok 11\n";
 
 $ok = 1;
 
-for my $exp(0..10, 20, 30, 280 .. 300,) {
-  for my $digits(1..26) {
+for my $exp(0..10, 20, 30, 350 .. 430) {
+  for my $digits(1..16) {
     my $man = '-' . random_select($digits);
     my $d64 = MEtoD64($man, $exp);
     my $check = DPDtoD64($man, $exp);
@@ -128,8 +128,8 @@ $ok ? print "ok 12\n" : print "not ok 12\n";
 
 $ok = 1;
 
-for my $exp(0..10, 20, 30, 280 .. 300,) {
-  for my $digits(1..26) {
+for my $exp(0..10, 20, 30, 350 .. 430) {
+  for my $digits(1..16) {
     my $man = random_select($digits);
     my $d64 = MEtoD64($man, -$exp);
     my $check = DPDtoD64($man, -$exp);
