@@ -1056,6 +1056,19 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       Doing Math::Decimal64->new($mantissa, $exponent) will also
       create and assign using MEtoD64(), and is equally acceptable.
 
+     ######################################
+     $d64 = DPDtoD64($mantissa, $exponent);
+
+      eg: $d64 = DPDtoD64('12345', -3); # 12.345
+
+      This perhaps a quicker way of creating the Math::Decimal128
+      object with the intended value - but works only for DPD format
+      - ie only if d128_fmt() returns 'DPD'.
+      The mantissa string can be 'inf' or 'nan', optionally prefixed
+      with '-' or '+'. Otherwise, the mantissa string must
+      represent an integer value (with implied '.0' at the end) - ie
+      cannot contain a decimal point.
+
      ######################
      # Assign from a string
      $d64 = PVtoD64($string);
@@ -1064,9 +1077,11 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
           $d64 = PVtoD64('-9307199254740993e-15');
           $d64 = Math::Decimal64->new('-9787199254740993');
           $d64 = Math::Decimal64->new('-9307199254740993e-23');
+          $d64 = Math::Decimal64->new('-inf');
+          $d64 = Math::Decimal64->new('nan');
 
       Does no checks on its arg. The arg can be in either integer
-      format or scientific notation or float format.
+      format or scientific notation, float format or (+-)inf/nan.
       Doing Math::Decimal64->new($string) will also create and
       assign using PVtoD64().
       This assigns using the C standard library function strtold(),
@@ -1080,7 +1095,9 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       Doing Math::Decimal64->new($uv) will also create and assign
       using UVtoD64().
-      Assigns the designated UV value to the Math::Decimal64 object.
+      Assigns the designated UV value to the Math::Decimal64 object
+      (but only to the extent that the _Decimal64 can accommodate
+      the value of the UV).
 
      ####################################
      # Assign from an IV (signed integer)
@@ -1090,7 +1107,9 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       Doing Math::Decimal64->new($iv) will also create and assign
       using IVtoD64().
-      Assigns the designated IV value to the Math::Decimal64 object.
+      Assigns the designated IV value to the Math::Decimal64 object
+      (but only to the extent that the _Decimal64 can accommodate
+      the value of the IV).
 
      ################################################
      # Assign from an existing Math::Decimal64 object
@@ -1128,12 +1147,13 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       If your C compiler provides the strtod64 function, and
       you configured the Makefile.PL to enable access to that
       function then you can use this function.
-      usage is is as for PVtoD64().
+      Usage is is as for PVtoD64().
 
      ##############################
 
 =head1 ASSIGN A NEW VALUE TO AN EXISTING OBJECT
 
+     #####################################
      assignME($d64, $mantissa, $exponent);
       Assigns the value represented by ($mantissa, $exponent)
       to the Math::Decimal64 object, $d64.
@@ -1141,54 +1161,76 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       eg: assignME($d64, '123459', -6); # 0.123459
 
+     ######################################
+     assignDPD($d64, $mantissa, $exponent);
+      Assigns the value represented by ($mantissa, $exponent)
+      to the Math::Decimal128 object, $d128. This might work
+      more efficiently than assignME(), but works only when the
+      _Decimal128 type is DPD-formatted. (The d128_fmt function
+      will tell you whether the _Decimal128 is DPD-formatted or
+      BID-formatted.)
+
+      eg: assignDPD($d64, '123459', -6); # 0.123459
+
+     ########################
      assignPV($d64, $string);
       Assigns the value represented by $string to the
       Math::Decimal64 object, $d64.
 
       eg: assignPV($d64, '123459e-6'); # 0.123459
 
+     ################
      assignNaN($d64);
       Assigns a NaN to the Math::Decimal64 object, $d64.
 
+     #######################
      assignInf($d64, $sign);
       Assigns an Inf to the Math::Decimal64 object, $d64.
       If $sign is negative, assigns -Inf; otherwise +Inf.
 
+     #######################
+
 =head1 INF, NAN and ZERO OBJECTS
 
+     #####################
      $d64 = InfD64($sign);
       If $sign < 0, creates a new Math::Decimal64 object set to
       negative infinity; else creates a Math::Decimal64 object set
       to positive infinity.
 
+     ################
      $d64 = NaND64();
       Creates a new Math::Decimal64 object set to NaN.
       Same as "$d64 = Math::Decimal64->new();"
 
+     ######################
      $d64 = ZeroD64($sign);
       If $sign < 0, creates a new Math::Decimal64 object set to
       negative zero; else creates a Math::Decimal64 object set to
       zero.
+
+    #######################
 
 =head1 RETRIEVAL FUNCTIONS
 
     The following functions provide ways of seeing the value of
     Math::Decimal64 objects.
 
+     ###########################
      $string = decode_d64($d64);
       This function calls either decode_dpd() or decode_bid(),
       depending upon the formatting used to encode the
       _Decimal64 value (as determined by the d64_fmt() sub).
       It returns the value as a string of the form (-)ME, where:
-       "M" is the mantissa, containing up to 16 base 10 digits;
-       "E" is the letter "e" followed by the exponent;
-       A minus sign is prefixed to any -ve number (incl -0), but no
-       sign at all is prefixed for +ve numbers (incl +0).
-      For example: +876301e17
+        "M" is the mantissa, containing up to 16 base 10 digits;
+        "E" is the letter "e" followed by the exponent;
+      A minus sign is prefixed to any -ve number (incl -0), but no
+      sign at all is prefixed for +ve numbers (incl +0).
       Returns the strings '+inf', '-inf', 'nan' for (respectively)
       +infinity, -infinity, NaN.
       The value will be decoded correctly.
 
+     ##################################
      $string = decode_dpd($d64_binary);
      $string = decode_bid($d64_binary);
 
@@ -1202,6 +1244,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       call the appropriate decode_*() function for that encoding.
       The d64_fmt() sub will tell you which encoding is in use.
 
+     #######################################
      ($mantissa, $exponent) = D64toME($d64);
       Returns the value of the Math::Decimal object as a
       mantissa (string of up to 16 decimal digits) and exponent.
@@ -1209,6 +1252,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       value in your preferred format. Afaik, the value will be
       decoded accurately.
 
+     ########################################
      ($mantissa, $exponent) = FR64toME($d64);
       Requires that Math::MPFR version 3.18 or later has been
       loaded. It also requires that Math:MPFR has been built with
@@ -1217,15 +1261,18 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       will return true. (Otherwise it returns false.)
       Afaik, the value will be decoded accurately.
 
+     ####################
      $nv = D64toNV($d64);
       This function returns the value of the Math::Decimal64
       object to a perl scalar (NV). Under certain conditions
       it may not translate the value accurately.
 
+     ###########
      print $d64;
       Will print the value in the format (eg) -12345e-2, which
       equates to the decimal -123.45. Uses D64toME().
 
+     #########
      pFR $d64;
       Will print the value in the format (eg) -12345e-2, which
       equates to the decimal -123.45. Uses FR64toME() - which
@@ -1234,23 +1281,47 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
        1) has been loaded;
        2) supports the Decimal64 mpfr conversion functions.
 
+     #########
+
 =head1 OTHER FUNCTIONS
 
+     ################################
+     ($man, $exp) = PVtoME($string);
+      $string is a string representing a floating-point value - eg
+      'inf', '+nan', '123.456', '-1234.56e-1', or '12345.6E-2'.
+      The function returns an array of (mantissa, exponent), where
+      the mantissa is a string of base 10 digits (prefixed with a
+      '-' for -ve values) with an implied decimal point at the
+      end of the string. For strings such as 'inf' and 'nan', the
+      mantissa will be set to $string, and the exponent to 0.
+      For the example strings given above, the returned arrays
+      would be ('inf', 0), ('+nan', 0), ('123456', -3), ('-123456',
+      -3) and ('123456', -3) respectively.
+
+     #######################################
+     $string = MEtoPV($mantissa, $exponent);
+      If $mantissa =~ /inf|nan/i returns $mantissa.
+      Else returns $mantissa . 'e' . $exponent.
+      
+     #################
      $fmt = d64_fmt();
       Returns either 'DPD' or 'BID', depending upon whether the
       (internal) _Decimal64 values are encoded using the 'Densely
       Packed Decimal' format or the 'Binary Integer Decimal'
       format.
 
+     #######################
      $hex = d64_bytes($d64);
       Returns the hex representation of the _Decimal64 value
       as a string of 16 hex characters.
 
+     ############################
      $binary = hex2bin($d64_hex);
       Takes the string returned by d64_bytes (above) and
       rewrites it in binary form - ie as a string of 64 base 2
       digits.
 
+     #################
      $d64 = DEC64_MAX; # 9999999999999999e369
      $d64 = DEC64_MIN; # 1e-398
       DEC64_MAX is the largest positive finite representable
@@ -1259,11 +1330,13 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       _Decimal64 value.
       Multiply these by -1 to get their negative counterparts.
 
+     ###################
      $d64 = Exp10($pow);
       Returns a Math::Decimal64 object with a value of
       10 ** $pow, for $pow in the range (-398 .. 384). Croaks
       with appropriate message if $pow is not within that range.
 
+     ########################
      $bool = have_strtod64();
       Returns true if, when building Math::Decimal64,
       the Makefile.PL was configured to make the STRtoD64()
@@ -1273,23 +1346,27 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       C library doesn't provide the strtod64 function.)
 
 
+     #########################
      $test = is_ZeroD64($d64);
       Returns:
        -1 if $d64 is negative zero;
-        1 if $d64 is a positive zero;
+        1 if $d64 is zero, but not negative zero;
         0 if $d64 is not zero.
 
+     ########################
      $test = is_InfD64($d64);
       Returns:
        -1 if $d64 is negative infinity;
         1 if $d64 is positive infinity;
         0 if $d64 is not infinity.
 
+     ########################
      $bool = is_NaND64($d64);
       Returns:
         1 if $d64 is a NaN;
         0 if $d64 is not a NaN.
 
+     ###################
      LDtoD64($d64, $ld); # $ld is a Math::LongDouble object
      D64toLD($ld, $d64); # $ld is a Math::LongDouble object
 
@@ -1298,15 +1375,20 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
      _Decimal64 value, or (resp.) vice-versa.
      Requires that Math::LongDouble has been loaded.
 
+     #######################
      $sign = get_sign($d64);
       Returns the sign ('+' or '-') of $d64.
 
+     #####################
      $exp = get_exp($d64);
-      Returns the exponent of $d64. This is the value that's
-      stored internally within the encapsulated _Decimal64 value;
-      it may differ from the value that you assigned. For example,
-      if you've assigned the value MEtoD64('100', 0) it will
-      probably be held internally as '1e2', not '100e0'.
+      Returns the exponent of $d64. This is the exponent value
+      that's stored internally within the encapsulated _Decimal64
+      value; it may differ from the value that you assigned.
+      For example, if you've assigned the value MEtoD64('100', 0)
+      it will probably be held internally as '1e2', not '100e0',
+      in which case get_exp() would return 2, not 0.
+
+     ####################
 
 =head1 LICENSE
 
