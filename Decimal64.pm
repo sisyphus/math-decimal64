@@ -896,7 +896,7 @@ sub _MEtoBINSTR {
   # Converts (mantissa, exponent) strings to DPD encoded 64-bit string - without
   # the need to actually calculate the value.
   my $man = shift;
-  my $mano = $man;
+
   if($man =~ /^(\-|\+)?inf|^(\-|\+)?nan/i) {
      $man =~ /\-inf/i ? return '11111' . ('0' x 59)
                       : $man =~ /^(\-|\+)?nan/i ? return '011111' . ('0' x 58)
@@ -904,7 +904,6 @@ sub _MEtoBINSTR {
   }
 
   my $exp = shift;
-  my $expo = $exp;
 
   # Determine the sign, and remove it.
   my $sign = $man =~ /^\-/ ? '1' : '0';
