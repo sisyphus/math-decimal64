@@ -896,6 +896,7 @@ sub _MEtoBINSTR {
   # Converts (mantissa, exponent) strings to DPD encoded 64-bit string - without
   # the need to actually calculate the value.
   my $man = shift;
+  my $mano = $man;
   if($man =~ /^(\-|\+)?inf|^(\-|\+)?nan/i) {
      $man =~ /\-inf/i ? return '11111' . ('0' x 59)
                       : $man =~ /^(\-|\+)?nan/i ? return '011111' . ('0' x 58)
@@ -903,6 +904,7 @@ sub _MEtoBINSTR {
   }
 
   my $exp = shift;
+  my $expo = $exp;
 
   # Determine the sign, and remove it.
   my $sign = $man =~ /^\-/ ? '1' : '0';
@@ -910,24 +912,31 @@ sub _MEtoBINSTR {
   die "_MEtoBINSTR has been passed (probably from DPDtoBINSTR) an illegal mantissa"
     if $man =~ /[^0-9]/;
 
-  my $no_padding = 0;
+  # Remove leading zeroes, and return zero (of appropriate sign)
+  # if we're left with the empty string.
+  $man =~ s/^0+//;
+  return $sign . '0100001101101' . ('0' x 50) unless $man;
+
+  # Fill the mantissa with 16 digits - by zero padding the end.
+  my $add_zeroes = 16 - length($man);
+  $man .= '0' x $add_zeroes;
+  $exp -= $add_zeroes;
 
   if(length($man) > 16 || $exp < -398) {
     die "$man exceeds _Decimal64 precision. It needs to be shortened to no more than 16 decimal digits"
       if length($man) > 16;
     ($man, $exp) = _round_as_needed($man, $exp);
-    $no_padding = 1;
-  }
-
-  # Fill the mantissa with 16 digits - by zero padding the end (unless $no_padding has been set).
-  unless($no_padding) {
-    my $add_zeroes = 16 - length($man);
-    $man .= '0' x $add_zeroes;
-    $exp -= $add_zeroes;
   }
 
   # Return 0 if $exp is still less that -398.
-  return $sign . '011000110100000000000000000000000000000000000000000000000000000' if $exp < -398;
+  return $sign . '0100001101101' . ('0' x 50) if $exp < -398;
+
+  # Return -inf/inf if value is infinite
+  if($exp > 369) {
+    return $sign . '1111'  . ('0' x 59) if (length($man) + $exp) > 385;
+  }
+
+  $man = '0' . $man while length($man) < 16;
 
   # The last 50 bits encode the last 15 digits.
   my $last_15_dig = substr($man, 1, 15);
