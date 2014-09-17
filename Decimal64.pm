@@ -347,6 +347,7 @@ for my $key(keys(%Math::Decimal64::dpd_encode)) {
 $Math::Decimal64::nan_str  = unpack("a*", pack( "B*", '011111' . ('0' x 58)));
 $Math::Decimal64::ninf_str = unpack("a*", pack( "B*", '11111'  . ('0' x 59)));
 $Math::Decimal64::pinf_str = unpack("a*", pack( "B*", '01111'  . ('0' x 59)));
+$Math::Decimal64::fmt = d64_fmt();
 
 #######################################################################
 #######################################################################
@@ -630,9 +631,11 @@ sub hex2bin {
 #######################################################################
 
 sub d64_fmt {
-  my $d64 = MEtoD64('99', 0);
-  return 'DPD' if d64_bytes($d64) =~ /000$/;
-  return 'BID' if d64_bytes($d64) =~ /063$/;
+  my $d64 = MEtoD64('1234567890123456', 0);
+  # BID: 31C462D53C8ABAC0
+  # DPD: 263934B9C1E28E56
+  return 'DPD' if d64_bytes($d64) =~ /E56$/i;
+  return 'BID' if d64_bytes($d64) =~ /AC0$/i;
   return 'Unknown';
 }
 
@@ -1301,7 +1304,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
      $string = MEtoPV($mantissa, $exponent);
       If $mantissa =~ /inf|nan/i returns $mantissa.
       Else returns $mantissa . 'e' . $exponent.
-      
+
      #################
      $fmt = d64_fmt();
       Returns either 'DPD' or 'BID', depending upon whether the
