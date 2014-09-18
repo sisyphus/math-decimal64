@@ -1090,8 +1090,8 @@ void _D64toME(pTHX_ SV * a) {
           Newx(buffer, 32, char);
           if(buffer == NULL)croak("Couldn't allocate memory in _D64toME");
 #if defined(__powerpc__) || defined(_ARCH_PPC) || defined(_M_PPC) || defined(__PPCGECKO__) || defined(__PPCBROADWAY__)
-          /* Formatting bug (in C compiler/libc) wrt 897e-292 */
-          if(t == 897e-292DD) fmt = "%.14Le";
+          /* Formatting bug (in C compiler/libc) wrt (+-)897e-292 */
+          if(t == 897e-292DD || t == -897e-292DD) fmt = "%.14Le";
 #endif
           sprintf(buffer, fmt, (long double)t);
           EXTEND(SP, 3);
