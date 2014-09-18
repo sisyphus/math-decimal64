@@ -31,6 +31,8 @@ else {
 
 if($fmt eq $Math::Decimal64::fmt) {print "ok 4\n"}
 else {
-  warn "$fmt ne $Math::Decimal64::fmt\n";
+  warn "\n d64_bytes(MEtoD64('1234567890123456', 0)) is expected to be either\n",
+       " 31C462D53C8ABAC0 (for BID format) or 263934B9C1E28E56 (for DPD format).\n",
+       " Instead we got: ", d64_bytes(MEtoD64('1234567890123456', 0)), "\n";
   print "not ok 4\n";
 }
