@@ -64,7 +64,18 @@ use overload
   'int'   => \&_overload_int,
 ;
 
-%Math::Decimal64::dpd_encode = d64_fmt() eq 'DPD' ? (
+#######################################################################
+#######################################################################
+
+$Math::Decimal64::nan_str  = unpack("a*", pack( "B*", '011111' . ('0' x 58)));
+$Math::Decimal64::ninf_str = unpack("a*", pack( "B*", '11111'  . ('0' x 59)));
+$Math::Decimal64::pinf_str = unpack("a*", pack( "B*", '01111'  . ('0' x 59)));
+$Math::Decimal64::fmt = d64_fmt();
+
+#######################################################################
+#######################################################################
+
+%Math::Decimal64::dpd_encode = $Math::Decimal64::fmt eq 'DPD' ? (
      '0000000000' => '000', '0000000001' => '001', '0000000010' => '002', '0000000011' => '003',
      '0000000100' => '004', '0000000101' => '005', '0000000110' => '006', '0000000111' => '007',
      '0000001000' => '008', '0000001001' => '009', '0000010000' => '010', '0000010001' => '011',
@@ -330,7 +341,7 @@ for my $key(keys(%Math::Decimal64::dpd_encode)) {
 #######################################################################
 #######################################################################
 
-%Math::Decimal64::bid_decode = d64_fmt() eq 'BID' ? (
+%Math::Decimal64::bid_decode = $Math::Decimal64::fmt eq 'BID' ? (
  0 => MEtoD64('1' . ('0' x 15), 0), 1 => MEtoD64('1' . ('0' x 14), 0),
  2 => MEtoD64('1' . ('0' x 13), 0), 3 => MEtoD64('1' . ('0' x 12), 0),
  4 => MEtoD64('1' . ('0' x 11), 0), 5 => MEtoD64('1' . ('0' x 10), 0),
@@ -343,14 +354,7 @@ for my $key(keys(%Math::Decimal64::dpd_encode)) {
 
 #######################################################################
 #######################################################################
-
-$Math::Decimal64::nan_str  = unpack("a*", pack( "B*", '011111' . ('0' x 58)));
-$Math::Decimal64::ninf_str = unpack("a*", pack( "B*", '11111'  . ('0' x 59)));
-$Math::Decimal64::pinf_str = unpack("a*", pack( "B*", '01111'  . ('0' x 59)));
-$Math::Decimal64::fmt = d64_fmt();
-
-#######################################################################
-#######################################################################
+# Used only wrt BID encoding
 
 sub _decode_mant {
   my $val = shift;
@@ -805,7 +809,7 @@ sub DEC64_MIN {return _DEC64_MIN()}
 sub get_exp {
   my $keep = hex2bin(d64_bytes($_[0]));
   my $pre = substr($keep, 1, 2);
-  if(d64_fmt() eq 'DPD') {
+  if($Math::Decimal64::fmt eq 'DPD') {
     if($pre eq '00' || $pre eq '01' || $pre eq '10') {
       return oct('0b' . $pre . substr($keep, 6, 8)) - 398;
     }
@@ -1063,9 +1067,9 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       eg: $d64 = DPDtoD64('12345', -3); # 12.345
 
-      This perhaps a quicker way of creating the Math::Decimal128
+      This perhaps a quicker way of creating the Math::Decimal64
       object with the intended value - but works only for DPD format
-      - ie only if d128_fmt() returns 'DPD'.
+      - ie only if d64_fmt() returns 'DPD'.
       The mantissa string can be 'inf' or 'nan', optionally prefixed
       with '-' or '+'. Otherwise, the mantissa string must
       represent an integer value (with implied '.0' at the end) - ie
@@ -1166,10 +1170,10 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
      ######################################
      assignDPD($d64, $mantissa, $exponent);
       Assigns the value represented by ($mantissa, $exponent)
-      to the Math::Decimal128 object, $d128. This might work
+      to the Math::Decimal64 object, $d64. This might work
       more efficiently than assignME(), but works only when the
-      _Decimal128 type is DPD-formatted. (The d128_fmt function
-      will tell you whether the _Decimal128 is DPD-formatted or
+      _Decimal64type is DPD-formatted. (The d64_fmt function
+      will tell you whether the _Decimal64 is DPD-formatted or
       BID-formatted.)
 
       eg: assignDPD($d64, '123459', -6); # 0.123459
@@ -1244,7 +1248,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       DPD and BID formats will return different strings - so you
       need to know which encoding (DPD or BID) was used, and then
       call the appropriate decode_*() function for that encoding.
-      The d64_fmt() sub will tell you which encoding is in use.
+      $Math::Decimal64::fmt will tell you which encoding is in use,
+      as also will the d64_fmt() subroutine.
 
      #######################################
      ($mantissa, $exponent) = D64toME($d64);
