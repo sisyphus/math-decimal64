@@ -1,7 +1,11 @@
 0.09
+ - Add D64toFSTR()
+ - Fix Decimal64.pm's FR64toME to work with Math-MPFR-3.23 and later (when
+   Rmpfr_set_decimal64 was renamed to Rmpfr_set_DECIMAL64).
 
 0.08
  - Add get_exp() and get_sign()
+ - Add d64_bytes()
 
 0.07
  - Add unpack() and associated subs.
