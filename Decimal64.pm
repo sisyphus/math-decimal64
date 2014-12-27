@@ -20,7 +20,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
 @Math::Decimal64::EXPORT = ();
 @Math::Decimal64::EXPORT_OK = qw(
     MEtoD64 UVtoD64 IVtoD64 NVtoD64 PVtoD64 STRtoD64 D64toME D64toNV
-    FR64toME pFR
+    FR64toME pFR D64toFSTR
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
@@ -30,7 +30,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
 
 %Math::Decimal64::EXPORT_TAGS = (all => [qw(
     MEtoD64 UVtoD64 IVtoD64 NVtoD64 PVtoD64 STRtoD64 D64toME D64toNV
-    FR64toME pFR
+    FR64toME pFR D64toFSTR
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
@@ -493,7 +493,9 @@ sub D64toME {
 sub FR64toME {
 
   my $fr = Math::MPFR::Rmpfr_init2(55);
-  Math::MPFR::Rmpfr_set_decimal64($fr, $_[0], 0); #MPFR_RNDN
+  my $v = $Math::MPFR::VERSION;
+  $v ge '3.23' ? Math::MPFR::Rmpfr_set_DECIMAL64($fr, $_[0], 0)
+               : Math::MPFR::Rmpfr_set_decimal64($fr, $_[0], 0); # round to nearest
 
   if(Math::MPFR::Rmpfr_zero_p($fr) ||
      Math::MPFR::Rmpfr_inf_p($fr)  ||
@@ -977,6 +979,35 @@ sub _MEtoBINSTR {
 #######################################################################
 #######################################################################
 
+sub D64toFSTR {
+# Converts the argument (M::D64 object) to a string in floating point
+# format - as distinct from scientific notation.
+  my($m, $e) = D64toME($_[0]);
+  return 'nan' if is_NaND64($_[0]);
+  if(is_InfD64($_[0])) {
+    return 'inf' if is_InfD64($_[0])> 0;
+    return '-inf';
+  }
+  return $m . '0' x $e if $e >= 0;
+  my($len, $sign) = (length $m, '');
+  $m =~ s/^\-//;
+  if($len != length $m) {
+    $len--;
+    $sign = '-';
+  }
+  if($len + $e > 0) {
+    substr($m, $e, 0, '.');
+    return $sign . $m;
+  }
+  if($len + $e < 0) {
+    return $sign . '0.' . '0' x -($len + $e) . $m;
+  }
+  return $sign . '0.' . $m;
+}
+
+#######################################################################
+#######################################################################
+
 *decode_d64 = $Math::Decimal64::fmt eq 'DPD' ? \&decode_dpd : \&decode_bid;
 
 #######################################################################
@@ -1250,6 +1281,14 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       call the appropriate decode_*() function for that encoding.
       $Math::Decimal64::fmt will tell you which encoding is in use,
       as also will the d64_fmt() subroutine.
+
+     #######################################
+     $fstring = D64toFSTR($d64);
+
+      Returns a string in floating point format (as distinct from
+      scientific notation) - ie as 0.123 instead of 123e-3.
+      And, yes, the _Decimal64 value 123e201 will be returned as a
+      string consisting of '123' followed by 201 zeroes.
 
      #######################################
      ($mantissa, $exponent) = D64toME($d64);
