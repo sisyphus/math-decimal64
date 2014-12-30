@@ -20,7 +20,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
 @Math::Decimal64::EXPORT = ();
 @Math::Decimal64::EXPORT_OK = qw(
     MEtoD64 UVtoD64 IVtoD64 NVtoD64 PVtoD64 STRtoD64 D64toME D64toNV
-    FR64toME pFR D64toFSTR
+    FR64toME pFR D64toFSTR D64toRSTR
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
@@ -30,7 +30,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
 
 %Math::Decimal64::EXPORT_TAGS = (all => [qw(
     MEtoD64 UVtoD64 IVtoD64 NVtoD64 PVtoD64 STRtoD64 D64toME D64toNV
-    FR64toME pFR D64toFSTR
+    FR64toME pFR D64toFSTR D64toRSTR
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
@@ -1008,6 +1008,79 @@ sub D64toFSTR {
 #######################################################################
 #######################################################################
 
+sub D64toRSTR {
+# As for D64toFSTR, but rounds the string to the no. of
+# decimal places specified by the second arg.
+
+  die "2nd arg to D64toRSTR() must be greater than zero"
+    unless $_[1] >= 0;
+
+  my $dp = $_[1] ? '.' : '';
+
+  my $str = D64toFSTR($_[0]);
+
+  return $str . "$dp" . '0' x $_[1] unless $str =~ /\./;
+
+  my($leading, $trailing) = split /\./, $str;
+  my $len_trail = length $trailing ;
+
+  return $str if ($_[1] == $len_trail);
+
+  if(length($trailing) <= $_[1]) {
+    $trailing .= '0' x ($_[1] - length($trailing));
+    return $leading . "$dp" . $trailing;
+  }
+
+  # $len_trail > specified number of decimal places ($_[1]).
+  # We need to round (to nearest, ties to even) from here on.
+
+  return $leading . "$dp" . substr($trailing, 0, $_[1])
+    if (substr($trailing, $_[1], 1) <= 4) ||
+       (substr($trailing, $_[1]) =~ /^5(0+)?$/ && substr($trailing, $_[1] - 1, 1) % 2 == 0);
+
+  my $to_inc = substr($trailing, 0, $_[1]);
+
+  my $carry = _increment($to_inc); # $carry will either be mt string or '1'. If '1', then we
+                                   # also need to increment $leading.
+
+  return $leading . "$dp" . $to_inc
+    if $carry eq '';
+
+  my($sign, $len_lead) = ('', length($leading));
+
+  $leading =~ s/^\-//;
+
+  if($len_lead != length($leading)) {
+    $sign = '-';
+    $len_lead--;
+  }
+
+  $carry = _increment($leading);
+
+  return $sign . $carry . $leading . "$dp" . $to_inc;
+}
+
+#######################################################################
+#######################################################################
+
+sub _increment {
+  my $carry = 1;
+  my $len = length($_[0]) * -1;
+
+  for(my $offset = -1; $offset >= $len; $offset--) {
+     substr($_[0], $offset, 1) = (substr($_[0], $offset, 1) + 1) % 10;
+     if(substr($_[0], $offset, 1) ne '0') {
+       $carry = '';
+       last;
+     }
+  }
+
+  return $carry;
+}
+
+#######################################################################
+#######################################################################
+
 *decode_d64 = $Math::Decimal64::fmt eq 'DPD' ? \&decode_dpd : \&decode_bid;
 
 #######################################################################
@@ -1289,6 +1362,13 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       scientific notation) - ie as 0.123 instead of 123e-3.
       And, yes, the _Decimal64 value 123e201 will be returned as a
       string consisting of '123' followed by 201 zeroes.
+
+     #######################################
+     $rstring = D64toFSTR($d64, $places);
+      Same as D64toFSTR() but the returned string has been rounded
+      (to nearest, ties to even) to the number of decimal places
+      specified by $places.
+      Croaks with appropriate error message if $places < 0.
 
      #######################################
      ($mantissa, $exponent) = D64toME($d64);
