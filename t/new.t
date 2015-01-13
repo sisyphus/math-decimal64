@@ -3,7 +3,7 @@ use strict;
 use Math::Decimal64 qw(:all);
 use Math::BigInt;
 
-print "1..33\n";
+print "1..36\n";
 
 my ($nan,$d64, $d64_2);
 
@@ -32,7 +32,7 @@ else {
 }
 undef $d64;
 
-$d64 = Math::Decimal64->new(-10.75);
+$d64 = Math::Decimal64->new('-10.75');
 if($d64 == NVtoD64(-10.75)) {print "ok 4\n"}
 else {
   warn "\n\$64: $d64\n";
@@ -74,7 +74,7 @@ else {
 }
 undef $d64;
 
-$d64 = Math::Decimal64::new(-10.75);
+$d64 = Math::Decimal64::new('-10.75');
 if($d64 == NVtoD64(-10.75)) {print "ok 9\n"}
 else {
   warn "\n\$64: $d64\n";
@@ -116,7 +116,7 @@ else {
 }
 undef $d64;
 
-$d64 = new Math::Decimal64(-10.75);
+$d64 = new Math::Decimal64('-10.75');
 if($d64 == NVtoD64(-10.75)) {print "ok 14\n"}
 else {
   warn "\n\$64: $d64\n";
@@ -236,7 +236,7 @@ undef $d64_2;
 #######################################
 #######################################
 
-$d64_2 = Math::Decimal64->new(-110.75);
+$d64_2 = Math::Decimal64->new('-110.75');
 if($d64_2 == PVtoD64("-110.75")) {print "ok 28\n"}
 else {
   warn "\n\$64_2: $d64_2\n";
@@ -244,7 +244,7 @@ else {
 }
 undef $d64_2;
 
-$d64_2 = Math::Decimal64::new(-110.75);
+$d64_2 = Math::Decimal64::new('-110.75');
 if($d64_2 == PVtoD64("-110.75")) {print "ok 29\n"}
 else {
   warn "\n\$64_2: $d64_2\n";
@@ -252,7 +252,7 @@ else {
 }
 undef $d64_2;
 
-$d64_2 = new Math::Decimal64(-110.75);
+$d64_2 = new Math::Decimal64('-110.75');
 if($d64_2 == PVtoD64("-110.75")) {print "ok 30\n"}
 else {
   warn "\n\$64_2: $d64_2\n";
@@ -263,7 +263,7 @@ undef $d64_2;
 #######################################
 #######################################
 
-$d64_2 = Math::Decimal64->new(-110.75e2);
+$d64_2 = Math::Decimal64->new('-110.75e2');
 if($d64_2 == PVtoD64("-11075")) {print "ok 31\n"}
 else {
   warn "\n\$64_2: $d64_2\n";
@@ -271,7 +271,7 @@ else {
 }
 undef $d64_2;
 
-$d64_2 = Math::Decimal64::new(-110.75e2);
+$d64_2 = Math::Decimal64::new('-110.75e2');
 if($d64_2 == PVtoD64("-11075")) {print "ok 32\n"}
 else {
   warn "\n\$64_2: $d64_2\n";
@@ -279,7 +279,7 @@ else {
 }
 undef $d64_2;
 
-$d64_2 = new Math::Decimal64(-110.75e2);
+$d64_2 = new Math::Decimal64('-110.75e2');
 if($d64_2 == PVtoD64("-11075")) {print "ok 33\n"}
 else {
   warn "\n\$64_2: $d64_2\n";
@@ -289,5 +289,29 @@ undef $d64_2;
 
 #######################################
 #######################################
+
+eval {$d64_2 = Math::Decimal64->new(2.5);};
+
+if($@ =~ /new\(\) cannot be used to assign an NV/) {print "ok 34\n"}
+else {
+  warn "\$\@: $@\n";
+  print "not ok 34\n";
+}
+
+eval {$d64_2 = Math::Decimal64::new(2.5);};
+
+if($@ =~ /new\(\) cannot be used to assign an NV/) {print "ok 35\n"}
+else {
+  warn "\$\@: $@\n";
+  print "not ok 35\n";
+}
+
+eval {$d64_2 = new Math::Decimal64(2.5);};
+
+if($@ =~ /new\(\) cannot be used to assign an NV/) {print "ok 36\n"}
+else {
+  warn "\$\@: $@\n";
+  print "not ok 36\n";
+}
 
 
