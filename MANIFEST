@@ -35,3 +35,7 @@ t/decode_cross_checks.t
 t/assignDPD.t
 t/assignPV.t
 t/Exp10.t
+t/assignIV.t
+t/assignUV.t
+t/assignNV.t
+t/MEtoD64.t
