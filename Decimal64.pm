@@ -5,6 +5,7 @@ use 5.006;
 
 use warnings;
 use strict;
+use Config; # So MEtoD64 can check whether sizeof(longdouble) > 8.
 
 require Exporter;
 *import = \&Exporter::import;
@@ -24,6 +25,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
+    assignIV assignUV assignNV
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
     );
@@ -34,6 +36,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
+    assignIV assignUV assignNV
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
     )]);
@@ -62,6 +65,7 @@ use overload
   '++'    => \&_overload_inc,
   '--'    => \&_overload_dec,
   'int'   => \&_overload_int,
+  'neg'   => \&_overload_neg,
 ;
 
 #######################################################################
@@ -460,7 +464,7 @@ sub new {
     }
 
     if($type == 3) { # NV
-      return NVtoD64($arg);
+      die "new() cannot be used to assign an NV - use NVtoD64() instead";
     }
 
     if($type == 4) { # PV
@@ -526,10 +530,25 @@ sub MEtoD64 {
   my $len_1 = length $arg1;
   $len_1-- if $arg1 =~ /^\-/;
 
-  if($len_1 > 16 || $arg2 < -398) {
+  if($len_1 >= 16 || $arg2 < -398) {
     die "$arg1 exceeds _Decimal64 precision. It needs to be shortened to no more than 16 decimal digits"
       if $len_1 > 16;
-    ($arg1, $arg2) = _round_as_needed($arg1, $arg2);
+    ($arg1, $arg2) = _round_as_needed($arg1, $arg2) if $arg2 < -398;
+
+    # Need to handle the possibility that strtold can't handle all 16-digit values correctly.
+    if($Config{longdblsize} == 8) {
+      $len_1 = length $arg1;
+      my ($sign, $inc) = ('', 0);
+      if($arg1 =~ /^\-/) {
+        $len_1--;
+        $sign = '-';
+        $inc++;
+      }
+      if($len_1 == 16) {
+        return _MEtoD64($sign . substr($arg1, 0 + $inc, 8), $arg2 + 8) +
+               _MEtoD64($sign . substr($arg1, 8 + $inc, 8), $arg2);
+      }
+    }
   }
 
   return _MEtoD64($arg1, $arg2);
@@ -1135,14 +1154,28 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
     != == <= >= <=> < >
     ++ --
     =
-    abs bool int print
+    abs bool int print neg
 
     Arguments to the overloaded operations must be Math::Decimal64
     objects or integer (IV/UV) values.
 
-     $d64_2 = $d64_1 + 3.1; # Error. Best to either:
-     $d64_2 = $d64_1 + MEtoD64('31',-1); # or (equivalentally):
+     $d64_2 = $d64_1 + 3.1; # Error.
+     If you really want to add the NV 3.1 you need to:
+     $d64_2 = $d64_1 + NVtoD64(3.1);
+
+     If you instead wish to add the decimal value 3.1:
+     $d64_2 = $d64_1 + MEtoD64('31',-1);
+      or, equivalently:
      $d64_2 = $d64_1 + Math::Decimal64->new('31',-1);
+      or (a little slower):
+     $d64_2 = $d64_1 + PVtoD64('3.1');
+
+    Overloading of strings (PV values) will be enabled when the
+    strtod64() C function becomes more widely available.
+
+    Overloading of floats (NV values) will probably never be enabled
+    as that would make it very easy to inadvertently introduce a value
+    that was not intended.
 
 =head1 CREATION & ASSIGNMENT FUNCTIONS
 
@@ -1234,8 +1267,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       eg: $d64 = NVtoD64(-3.25);
 
-      Doing Math::Decimal64->new($nv) will also create and assign
-      using NVtoD64().
+      Doing Math::Decimal64->new($nv) is now a fatal error. NV's can
+      now be assigned using only either NVtoD64() or assignNV().
       Might not always assign the value you think it does. (Eg,
       see test 5 in t/overload_cmp.t.)
 
@@ -1250,6 +1283,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       If 2 arguments are supplied it uses MEtoD64().
       If one argument is provided, that arg's internal flags are
       used to determine the appropriate function to call.
+      Dies if that argument is an NV - allowing an NV argument makes
+      it very easy to inadvertently assign an unintended value.
 
      #######################
      # Assign using STRtoD64
@@ -1283,9 +1318,12 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       eg: assignDPD($d64, '123459', -6); # 0.123459
 
      ########################
+     assignIV($d64, $iv);
+     assignUV($d64, $uv);
+     assignNV($d64, $nv);
      assignPV($d64, $string);
-      Assigns the value represented by $string to the
-      Math::Decimal64 object, $d64.
+      Assigns the value represented by (resp.) the IV/UV/NV/PV to
+      the Math::Decimal64 object, $d64.
 
       eg: assignPV($d64, '123459e-6'); # 0.123459
 
@@ -1364,7 +1402,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       string consisting of '123' followed by 201 zeroes.
 
      #######################################
-     $rstring = D64toFSTR($d64, $places);
+     $rstring = D64toRSTR($d64, $places);
       Same as D64toFSTR() but the returned string has been rounded
       (to nearest, ties to even) to the number of decimal places
       specified by $places.
