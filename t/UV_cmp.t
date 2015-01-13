@@ -13,7 +13,7 @@ if($Config{ivsize} > 4) {
 }
 else {
 
-  my $dec1 = Math::Decimal64->new(1.7);
+  my $dec1 = NVtoD64(1.7);
 
   my $uv = ~0;
   my $uv_d64 = PVtoD64("$uv");
