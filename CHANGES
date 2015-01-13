@@ -1,5 +1,8 @@
 0.09
- - Add D64toFSTR() and D64toRSTR()
+ - Fix bug in overload_sub by adding overload_neg.
+ - No longer allow new() to assign an NV. (NVtoD64 must now be used instead.)
+ - Add assignIV(), assignUV() and assignNV().
+ - Add D64toFSTR() and D64toRSTR().
  - Fix Decimal64.pm's FR64toME to work with Math-MPFR-3.23 and later (when
    Rmpfr_set_decimal64 was renamed to Rmpfr_set_DECIMAL64).
 
