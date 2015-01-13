@@ -7,7 +7,7 @@ print "1..10\n";
 
 my $have_ld = $Config::Config{nvsize} > 8 ? 1 : 0;
 
-my $dec1 = Math::Decimal64->new(1.7);
+my $dec1 = NVtoD64(1.7);
 $dec1 /= 20;
 
 if($dec1 == MEtoD64('85', -3)) {print "ok 1\n"}
