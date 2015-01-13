@@ -483,6 +483,45 @@ void assignPV(pTHX_ SV * a, char * str) {
 }
 */
 
+void assignIV(pTHX_ SV * a, SV * val) {
+
+     if(sv_isobject(a)) {
+       const char * h = HvNAME(SvSTASH(SvRV(a)));
+       if(strEQ(h, "Math::Decimal64")) {
+          *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = (_Decimal64)SvIV(val);
+       }
+       else croak("Invalid object supplied to Math::Decimal64::assignIV function");
+     }
+     else croak("Invalid argument supplied to Math::Decimal64::assignIV function");
+
+}
+
+void assignUV(pTHX_ SV * a, SV * val) {
+
+     if(sv_isobject(a)) {
+       const char * h = HvNAME(SvSTASH(SvRV(a)));
+       if(strEQ(h, "Math::Decimal64")) {
+          *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = (_Decimal64)SvUV(val);
+       }
+       else croak("Invalid object supplied to Math::Decimal64::assignUV function");
+     }
+     else croak("Invalid argument supplied to Math::Decimal64::assignUV function");
+
+}
+
+void assignNV(pTHX_ SV * a, SV * val) {
+
+     if(sv_isobject(a)) {
+       const char * h = HvNAME(SvSTASH(SvRV(a)));
+       if(strEQ(h, "Math::Decimal64")) {
+          *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = (_Decimal64)SvNV(val);
+       }
+       else croak("Invalid object supplied to Math::Decimal64::assignNV function");
+     }
+     else croak("Invalid argument supplied to Math::Decimal64::assignNV function");
+
+}
+
 void assignNaN(pTHX_ SV * a) {
 
      if(sv_isobject(a)) {
@@ -611,13 +650,31 @@ SV * _overload_sub(pTHX_ SV * a, SV * b, SV * third) {
       }
       croak("Invalid object supplied to Math::Decimal64::_overload_sub function");
     }
-
+    /* replaced by _overload_neg
     if(third == &PL_sv_yes) {
       *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) * -1.0DD;
       return obj_ref;
     }
-
+    */
     croak("Invalid argument supplied to Math::Decimal64::_overload_sub function");
+}
+
+SV * _overload_neg(pTHX_ SV * a, SV * b, SV * third) {
+
+     _Decimal64 * d64;
+     SV * obj_ref, * obj;
+
+     Newx(d64, 1, _Decimal64);
+     if(d64 == NULL) croak("Failed to allocate memory in _overload_sub function");
+
+     obj_ref = newSV(0);
+     obj = newSVrv(obj_ref, "Math::Decimal64");
+
+     sv_setiv(obj, INT2PTR(IV,d64));
+     SvREADONLY_on(obj);
+
+     *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) * -1.0DD;
+     return obj_ref;
 }
 
 SV * _overload_div(pTHX_ SV * a, SV * b, SV * third) {
@@ -1185,7 +1242,7 @@ void _d64_bytes(pTHX_ SV * sv) {
 
   sp = mark;
 
-#ifdef WE_HAVE_BENDIAN
+#ifdef WE_HAVE_BENDIAN /* Big Endian architecture */
   for (i = 0; i < n; i++) {
 #else
   for (i = n - 1; i >= 0; i--) {
@@ -1476,6 +1533,57 @@ _assignME (a, mantissa, c)
         return; /* assume stack size is correct */
 
 void
+assignIV (a, val)
+	SV *	a
+	SV *	val
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        assignIV(aTHX_ a, val);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+assignUV (a, val)
+	SV *	a
+	SV *	val
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        assignUV(aTHX_ a, val);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+assignNV (a, val)
+	SV *	a
+	SV *	val
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        assignNV(aTHX_ a, val);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
 assignNaN (a)
 	SV *	a
         PREINIT:
@@ -1533,6 +1641,15 @@ _overload_sub (a, b, third)
 	SV *	third
 CODE:
   RETVAL = _overload_sub (aTHX_ a, b, third);
+OUTPUT:  RETVAL
+
+SV *
+_overload_neg (a, b, third)
+	SV *	a
+	SV *	b
+	SV *	third
+CODE:
+  RETVAL = _overload_neg (aTHX_ a, b, third);
 OUTPUT:  RETVAL
 
 SV *
