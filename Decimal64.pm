@@ -1159,7 +1159,10 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
     Arguments to the overloaded operations must be Math::Decimal64
     objects or integer (IV/UV) values.
 
-     $d64_2 = $d64_1 + 3.1; # Error.
+     $d64_2 = $d64_1 + $d128_0; #ok
+     $d64_2 = $d64_1 + 15;      #ok
+
+     $d64_2 = $d64_1 + 3.1;     # Error
      If you really want to add the NV 3.1 you need to:
      $d64_2 = $d64_1 + NVtoD64(3.1);
 
@@ -1193,9 +1196,6 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       Checks are conducted to ensure that the arguments are suitable.
       The mantissa string must represent an integer. (There's an
       implicit '.0' at the end of the string.)
-      Only known caveat is that, since this function does a strtold()
-      on the mantissa, the 'long double' needs to have at least 55
-      bits of precision.
       Doing Math::Decimal64->new($mantissa, $exponent) will also
       create and assign using MEtoD64(), and is equally acceptable.
 
