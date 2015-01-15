@@ -1,3 +1,5 @@
+0.10
+
 0.09
  - Change D64toME to use decode_d64() rather than C's strtold (as per Math::Decimal128).
  - Fix bug in overload_sub by adding overload_neg.
