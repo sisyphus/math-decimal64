@@ -483,12 +483,19 @@ sub new {
 #######################################################################
 
 sub D64toME {
-    return ('-0', '0') if (is_ZeroD64($_[0]) == -1); # Negative Zero.
-    my @ret = _D64toME($_[0]);
-    if(!defined($ret[1])) {
-      @ret = _sci2me($ret[0], $ret[2]);
-    }
-    return @ret;
+
+    my($ret1, $ret2) = split /e/i, decode_d64($_[0]);
+    $ret2 = 0 unless defined $ret2;
+    $ret2 = 0 if is_ZeroD64($_[0]);
+    return ($ret1, $ret2);
+
+## OLD - used strtold ##
+#    return ('-0', '0') if (is_ZeroD64($_[0]) == -1); # Negative Zero.
+#    my @ret = _D64toME($_[0]);
+#    if(!defined($ret[1])) {
+#      @ret = _sci2me($ret[0], $ret[2]);
+#    }
+#    return @ret;
 }
 
 #######################################################################
