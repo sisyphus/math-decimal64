@@ -1111,7 +1111,8 @@ SV * is_ZeroD64(pTHX_ SV * b) {
      croak("Invalid argument supplied to Math::Decimal64::is_ZeroD64 function");
 }
 
-void _D64toME(pTHX_ SV * a) {
+/* No longer used - made use of strtold(), which is less than desirable
+void _D64toME(SV * a) {
      dXSARGS;
      _Decimal64 t;
      char * buffer;
@@ -1129,32 +1130,33 @@ void _D64toME(pTHX_ SV * a) {
             XSRETURN(2);
           }
 
-          /* At this stage we know the arg is not a _Decimal64 infinity/0, but on powerpc it might be a
-             long double that's outside the allowable range */
+          *//* At this stage we know the arg is not a _Decimal64 infinity/0, but on powerpc it might be a
+             long double that's outside the allowable range *//*
 #if defined(__powerpc__) || defined(_ARCH_PPC) || defined(_M_PPC) || defined(__PPCGECKO__) || defined(__PPCBROADWAY__)
           if((long double)t > LDBL_MAX ||
              (long double)t < -LDBL_MAX) {
             count = 150;
-            t *= 1e-150DD; /* (long double)t should now be in range */
+            t *= 1e-150DD; *//* (long double)t should now be in range *//*
           }
 
           if((long double)t <  LDBL_MIN * 128.0L &&
              (long double)t > -LDBL_MIN * 128.0L) {
             count = -150;
-            t *= 1e150DD; /* (long double)t should now be in range */
+            t *= 1e150DD; *//* (long double)t should now be in range *//*
           }
 #endif
           Newx(buffer, 32, char);
           if(buffer == NULL)croak("Couldn't allocate memory in _D64toME");
-#if defined(__powerpc__) || defined(_ARCH_PPC) || defined(_M_PPC) || defined(__PPCGECKO__) || defined(__PPCBROADWAY__)
-          /* Formatting bug (in C compiler/libc) wrt (+-)897e-292 */
-          if(t == 897e-292DD || t == -897e-292DD) fmt = "%.14Le";
+#if defined(__powerpc__)
+          *//* Formatting bug (in C compiler/libc) wrt (+-)897e-292, (+-)78284e-294 *//*
+          if(t == 897e-292DD   || t == -897e-292DD ||
+             t == 78284e-294DD || t == -78284e-294DD) fmt = "%.14Le";
 #endif
           sprintf(buffer, fmt, (long double)t);
           EXTEND(SP, 3);
           ST(0) = sv_2mortal(newSVpv(buffer, 0));
           ST(1) = &PL_sv_undef;
-          ST(2) = sv_2mortal(newSViv(count)); /* count will be added to the exponent in D64toME() perl sub. */
+          ST(2) = sv_2mortal(newSViv(count)); *//* count will be added to the exponent in D64toME() perl sub. *//*
           Safefree(buffer);
           XSRETURN(3);
        }
@@ -1162,7 +1164,7 @@ void _D64toME(pTHX_ SV * a) {
      }
      else croak("Invalid argument supplied to Math::Decimal64::D64toME function");
 }
-
+/*
 /* Replaced by newer rendition (above) that caters for the case that the long double
    has the same exponent range as the double - eg. powerpc "double-double arithmetic".
 void _D64toME_deprecated(SV * a) {
@@ -1848,22 +1850,6 @@ is_ZeroD64 (b)
 CODE:
   RETVAL = is_ZeroD64 (aTHX_ b);
 OUTPUT:  RETVAL
-
-void
-_D64toME (a)
-	SV *	a
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        _D64toME(aTHX_ a);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
 
 void
 _c2ld (mantissa)
