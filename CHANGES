@@ -1,4 +1,5 @@
 0.09
+ - Change D64toME to use decode_d64() rather than C's strtold (as per Math::Decimal128).
  - Fix bug in overload_sub by adding overload_neg.
  - No longer allow new() to assign an NV. (NVtoD64 must now be used instead.)
  - Add assignIV(), assignUV() and assignNV().
