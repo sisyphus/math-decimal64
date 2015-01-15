@@ -1038,6 +1038,8 @@ sub D64toRSTR {
 
   my $str = D64toFSTR($_[0]);
 
+  return $str if $str =~ /n/i; # inf/nan
+
   return $str . "$dp" . '0' x $_[1] unless $str =~ /\./;
 
   my($leading, $trailing) = split /\./, $str;
