@@ -2,7 +2,7 @@ use warnings;
 use strict;
 use Math::Decimal64 qw(:all);
 
-print "1..12\n";
+print "1..14\n";
 
 my $check2 = Math::Decimal64->new(10, 0);
 my $add    = Math::Decimal64->new(1, -2);
@@ -31,7 +31,7 @@ else {
 
 my $nan = NaND64();
 ($man, $exp) = D64toME($nan);
-if($man != $man && $exp == 0) {print "ok 3\n"}
+if(($man != $man || $man =~ /nan/i) && $exp == 0) {print "ok 3\n"}
 else {
   warn "\$man: $man \$exp: $exp\n";
   print "not ok 3\n";
@@ -45,7 +45,7 @@ else {
   print "not ok 4\n";
 }
 
-if(($man / $man) != ($man /$man) && $exp == 0) {print "ok 5\n"}
+if(($man =~ /inf/i || ($man / $man) != ($man /$man)) && $exp == 0) {print "ok 5\n"}
 else {
   warn "\$man: $man \$exp: $exp\n";
   print "not ok 5\n";
@@ -165,6 +165,23 @@ if($man eq '-897' && $exp == -292) {print "ok 12\n"}
 else {
   warn "\$man: $man \$exp: $exp\n";
   print "not ok 12\n";
+}
+
+# Used to fail on my powerpc box - a bug in the compiler/libc print formatting (sprintf).
+$d64_1 = Math::Decimal64->new('78284', -294);
+($man, $exp) = D64toME($d64_1);
+if($man eq '78284' && $exp == -294) {print "ok 13\n"}
+else {
+  warn "\$man: $man \$exp: $exp\n";
+  print "not ok 13\n";
+}
+
+$d64_1 = Math::Decimal64->new('-78284', -294);
+($man, $exp) = D64toME($d64_1);
+if($man eq '-78284' && $exp == -294) {print "ok 14\n"}
+else {
+  warn "\$man: $man \$exp: $exp\n";
+  print "not ok 14\n";
 }
 
 
