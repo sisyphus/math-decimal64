@@ -3,7 +3,7 @@ use strict;
 use Math::Decimal64 qw(:all);
 use Math::BigInt;
 
-print "1..13\n";
+print "1..15\n";
 
 my $x = Math::Decimal64->new();
 my $badarg1 = 17;
@@ -104,4 +104,20 @@ if(is_InfD64($x) == -1) {print "ok 13\n"}
 else {
   warn "\n13: Expected -Inf, got $x\n";
   print "not ok 13\n";
+}
+
+assignME($x,         '9999999977777777', -103);
+
+if($x ==     MEtoD64('9999999977777777', -103)) {print "ok 14\n"}
+else {
+  warn "\n11:Expected 9999999977777777e-103, got $x\n";
+  print "not ok 14\n";
+}
+
+assignD64($x, MEtoD64('9999999917777777', -102));
+
+if($x == MEtoD64     ('9999999917777777', -102)) {print "ok 15\n"}
+else {
+  warn  "\n11:Expected 9999999917777777e-102, got $x\n";
+  print "not ok 15\n";
 }
