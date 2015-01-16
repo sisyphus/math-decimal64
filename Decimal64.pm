@@ -25,7 +25,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
-    assignIV assignUV assignNV
+    assignIV assignUV assignNV assignD64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
     );
@@ -36,7 +36,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
     D64toLD LDtoD64 DEC64_MAX DEC64_MIN
     assignME assignInf assignNaN assignPV Exp10 have_strtod64
-    assignIV assignUV assignNV
+    assignIV assignUV assignNV assignD64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
     )]);
@@ -358,7 +358,7 @@ for my $key(keys(%Math::Decimal64::dpd_encode)) {
 
 #######################################################################
 #######################################################################
-# Used only wrt BID encoding
+# Used by t/decode_cross_checks.t
 
 sub _decode_mant {
   my $val = shift;
@@ -616,13 +616,28 @@ sub assignME {
   my $len_2 = length($arg2);
   $len_2-- if $arg2 =~ /^\-/;
 
-  if($len_2 > 16 || $arg3 < -398) {
+  if($len_2 >= 16 || $arg3 < -398) {
     die "$arg2 exceeds _Decimal64 precision. It needs to be shortened to no more than 16 decimal digits"
       if $len_2 > 16;
-    ($arg2, $arg3) = _round_as_needed($arg2, $arg3);
+    ($arg2, $arg3) = _round_as_needed($arg2, $arg3) if $arg3 < -398;
+    # Need to handle the possibility that strtold can't handle all 16-digit values correctly.
+    if($Config{longdblsize} == 8) {
+      $len_2 = length $arg2;
+      my ($sign, $inc) = ('', 0);
+      if($arg2 =~ /^\-/) {
+        $len_2--;
+        $sign = '-';
+        $inc++;
+      }
+      if($len_2 == 16) {
+        assignD64($arg1,
+               _MEtoD64($sign . substr($arg2, 0 + $inc, 8), $arg3 + 8) +
+               _MEtoD64($sign . substr($arg2, 8 + $inc, 8), $arg3));
+      }
+    }
   }
 
-  return _assignME($arg1, $arg2, $arg3);
+  _assignME($arg1, $arg2, $arg3);
 
 }
 
@@ -1327,12 +1342,14 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       eg: assignDPD($d64, '123459', -6); # 0.123459
 
      ########################
-     assignIV($d64, $iv);
-     assignUV($d64, $uv);
-     assignNV($d64, $nv);
-     assignPV($d64, $string);
-      Assigns the value represented by (resp.) the IV/UV/NV/PV to
-      the Math::Decimal64 object, $d64.
+     assignIV ($d64, $iv);
+     assignUV ($d64, $uv);
+     assignNV ($d64, $nv);
+     assignPV ($d64, $string);
+     assignD64($d64, $d64_0);
+      Assigns the value represented by the second arg (resp. the
+      IV,UV,NV,PV, Math::Decimal64 object) to the
+       Math::Decimal64 object, $d64.
 
       eg: assignPV($d64, '123459e-6'); # 0.123459
 
