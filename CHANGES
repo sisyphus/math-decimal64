@@ -1,4 +1,7 @@
 0.10
+ - Remove (unused) XSubs _c2ld() and _c2d().
+ - add assignD64() and use it to modify sub assignME() such that the latter should always
+   work correctly even when $Config{longdblsize} is 8.
 
 0.09
  - Change D64toME to use decode_d64() rather than C's strtold (as per Math::Decimal128).
