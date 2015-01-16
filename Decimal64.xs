@@ -522,6 +522,20 @@ void assignNV(pTHX_ SV * a, SV * val) {
 
 }
 
+void assignD64(pTHX_ SV * a, SV * val) {
+
+     if(sv_isobject(a) && sv_isobject(val)) {
+       const char * h =  HvNAME(SvSTASH(SvRV(a)));
+       const char * hh = HvNAME(SvSTASH(SvRV(val)));
+       if(strEQ(h, "Math::Decimal64") && strEQ(hh, "Math::Decimal64")) {
+          *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = *(INT2PTR(_Decimal64 *, SvIV(SvRV(val))));
+       }
+       else croak("Invalid object supplied to Math::Decimal64::assignD64 function");
+     }
+     else croak("Invalid argument supplied to Math::Decimal64::assignD64 function");
+
+}
+
 void assignNaN(pTHX_ SV * a) {
 
      if(sv_isobject(a)) {
@@ -1196,34 +1210,6 @@ void _D64toME_deprecated(SV * a) {
 }
 */
 
-void _c2ld(pTHX_ char * mantissa) { /* convert using %.15Le */
-     dXSARGS;
-     long double man;
-     char *ptr, *buffer;
-
-     man = strtold(mantissa, &ptr);
-     Newx(buffer, 32, char);
-     sprintf(buffer, "%.15Le", man);
-
-     ST(0) = sv_2mortal(newSVpv(buffer, 0));
-     Safefree(buffer);
-     XSRETURN(1);
-}
-
-void _c2d(pTHX_ char * mantissa) { /* convert using %.15e */
-     dXSARGS;
-     double man;
-     char *ptr, *buffer;
-
-     man = strtod(mantissa, &ptr);
-     Newx(buffer, 32, char);
-     sprintf(buffer, "%.15e", man);
-
-     ST(0) = sv_2mortal(newSVpv(buffer, 0));
-     Safefree(buffer);
-     XSRETURN(1);
-}
-
 SV * _wrap_count(pTHX) {
      return newSVuv(PL_sv_count);
 }
@@ -1586,6 +1572,23 @@ assignNV (a, val)
         return; /* assume stack size is correct */
 
 void
+assignD64 (a, val)
+	SV *	a
+	SV *	val
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        assignD64(aTHX_ a, val);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
 assignNaN (a)
 	SV *	a
         PREINIT:
@@ -1850,38 +1853,6 @@ is_ZeroD64 (b)
 CODE:
   RETVAL = is_ZeroD64 (aTHX_ b);
 OUTPUT:  RETVAL
-
-void
-_c2ld (mantissa)
-	char *	mantissa
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        _c2ld(aTHX_ mantissa);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
-
-void
-_c2d (mantissa)
-	char *	mantissa
-        PREINIT:
-        I32* temp;
-        PPCODE:
-        temp = PL_markstack_ptr++;
-        _c2d(aTHX_ mantissa);
-        if (PL_markstack_ptr != temp) {
-          /* truly void, because dXSARGS not invoked */
-          PL_markstack_ptr = temp;
-          XSRETURN_EMPTY; /* return empty stack */
-        }
-        /* must have used dXSARGS; list context implied */
-        return; /* assume stack size is correct */
 
 SV *
 _wrap_count ()
