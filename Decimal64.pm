@@ -1181,7 +1181,10 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
     abs bool int print neg
 
     Arguments to the overloaded operations must be Math::Decimal64
-    objects or integer (IV/UV) values.
+    objects, integer (IV/UV) values or string (PV) values.
+    Strings can match /^(\-|\+)?(nan|inf)/i or be in floating point,
+    scientific notation or integer formats. Eg '113', '12.34', '12e-9',
+    '-12.34e+106', '-9E8', '-NaN', 'inf' are all valid strings.
 
      $d64_2 = $d64_1 + $d128_0; #ok
      $d64_2 = $d64_1 + 15;      #ok
@@ -1191,14 +1194,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
      $d64_2 = $d64_1 + NVtoD64(3.1);
 
      If you instead wish to add the decimal value 3.1:
-     $d64_2 = $d64_1 + MEtoD64('31',-1);
-      or, equivalently:
-     $d64_2 = $d64_1 + Math::Decimal64->new('31',-1);
-      or (a little slower):
-     $d64_2 = $d64_1 + PVtoD64('3.1');
-
-    Overloading of strings (PV values) will be enabled when the
-    strtod64() C function becomes more widely available.
+     $d64_2 = $d64_1 + '3.1';
 
     Overloading of floats (NV values) will probably never be enabled
     as that would make it very easy to inadvertently introduce a value
