@@ -39,3 +39,4 @@ t/assignIV.t
 t/assignUV.t
 t/assignNV.t
 t/MEtoD64.t
+t/overload_PV.t
