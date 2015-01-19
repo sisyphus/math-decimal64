@@ -1,4 +1,6 @@
 0.10
+ - Rewrite assignPV in XS. (Now uses _atodecimal XSub.)
+ - Rewrite PVtoD64. (Now uses _atodecimal XSub.)
  - Remove (unused) XSubs _c2ld() and _c2d().
  - add assignD64() and use it to modify sub assignME() such that the latter should always
    work correctly even when $Config{longdblsize} is 8.
