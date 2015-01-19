@@ -810,35 +810,35 @@ sub decode_bid {
 
 #######################################################################
 #######################################################################
-
-sub PVtoD64 {
-
-  my($arg1, $arg2) = PVtoME($_[0]);
-
-  if($arg1 =~ /inf|nan/i) {
-    $arg1 =~ /nan/i ? return NaND64()
-                    : $arg1 =~ /^\-/ ? return InfD64(-1)
-                                     : return InfD64(1);
-  }
-
-  return MEtoD64($arg1, $arg2);
-}
+# Replaced by XSub of same name
+# sub PVtoD64 {
+#
+#  my($arg1, $arg2) = PVtoME($_[0]);
+#
+#  if($arg1 =~ /inf|nan/i) {
+#    $arg1 =~ /nan/i ? return NaND64()
+#                    : $arg1 =~ /^\-/ ? return InfD64(-1)
+#                                     : return InfD64(1);
+#  }
+#
+#  return MEtoD64($arg1, $arg2);
+#}
 
 #######################################################################
 #######################################################################
-
-sub assignPV {
-
-  my($arg1, $arg2) = PVtoME($_[1]);
-  if($arg1 =~ /inf|nan/i) {
-    $arg1 =~ /nan/i ? assignNaN($_[0])
-                    : $arg1 =~ /^\-/ ? assignInf($_[0], -1)
-                                     : assignInf($_[0], 1);
-  }
-  else {
-    assignME($_[0], $arg1, $arg2);
-  }
-}
+# Replaced by XSub of same name
+# sub assignPV {
+#
+#  my($arg1, $arg2) = PVtoME($_[1]);
+#  if($arg1 =~ /inf|nan/i) {
+#    $arg1 =~ /nan/i ? assignNaN($_[0])
+#                    : $arg1 =~ /^\-/ ? assignInf($_[0], -1)
+#                                     : assignInf($_[0], 1);
+#  }
+#  else {
+#    assignME($_[0], $arg1, $arg2);
+#  }
+#}
 
 #######################################################################
 #######################################################################
@@ -1208,13 +1208,38 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
     The following create and assign a new Math::Decimal64 object.
 
+     ######################
+     # Assign from a string
+     $d64 = PVtoD64($string);
+
+      eg: $d64 = PVtoD64('-9427199254740993');
+          $d64 = PVtoD64('-9307199254740993e-15');
+          $d64 = Math::Decimal64->new('-9787199254740.993e-20');
+          $d64 = Math::Decimal64->new('-9307199254740993e-23');
+          $d64 = Math::Decimal64->new('-inf');
+          $d64 = Math::Decimal64->new('nan');
+
+      Not guaranteed to work correctly if the string contains space(s).
+      Does no checks on its arg. The arg can be in either integer
+      format or scientific notation, float format or (+-)inf/nan.
+      Doing Math::Decimal64->new($string) will also create and
+      assign using PVtoD64().
+      PVtoD64 is now a much improved way of creating and assigning - so
+      much so that I'm now recommending it as the preferred way of
+      creating a Math::Decimal64 object.
+      If you have a ($mantissa, $exponent) pair as your value and you
+      wish to create a Math::Decimal64 object using PVtoD64 you can do:
+       $d64 = PVtoD64(MEtoPV($mantissa, $exponent));
+       or simply:
+       $d64 = PVtoD64($mantissa . 'e' . $exponent);
+
      ###################################
      # Assign from mantissa and exponent
      $d64 = MEtoD64($mantissa, $exponent);
 
       eg: $d64 = MEtoD64('12345', -3); # 12.345
 
-      It's a little kludgy, but this is the safest and surest way
+      It's a little kludgy, but this is a safe and sure way
       of creating the Math::Decimal64 object with the intended
       value.
       Checks are conducted to ensure that the arguments are suitable.
@@ -1235,24 +1260,6 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       with '-' or '+'. Otherwise, the mantissa string must
       represent an integer value (with implied '.0' at the end) - ie
       cannot contain a decimal point.
-
-     ######################
-     # Assign from a string
-     $d64 = PVtoD64($string);
-
-      eg: $d64 = PVtoD64('-9427199254740993');
-          $d64 = PVtoD64('-9307199254740993e-15');
-          $d64 = Math::Decimal64->new('-9787199254740993');
-          $d64 = Math::Decimal64->new('-9307199254740993e-23');
-          $d64 = Math::Decimal64->new('-inf');
-          $d64 = Math::Decimal64->new('nan');
-
-      Does no checks on its arg. The arg can be in either integer
-      format or scientific notation, float format or (+-)inf/nan.
-      Doing Math::Decimal64->new($string) will also create and
-      assign using PVtoD64().
-      This assigns using the C standard library function strtold(),
-      and then casting to a _Decimal64.
 
      #####################################
      # Assign from a UV (unsigned integer)
@@ -1293,8 +1300,9 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       Doing Math::Decimal64->new($nv) is now a fatal error. NV's can
       now be assigned using only either NVtoD64() or assignNV().
-      Might not always assign the value you think it does. (Eg,
-      see test 5 in t/overload_cmp.t.)
+      Might not always assign the value you think it does, but should
+      be fine for assigning decimal values that have en exact base 2
+      representation. (Eg, see test 5 in t/overload_cmp.t.)
 
      ####################
      # Assign using new()
@@ -1308,7 +1316,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       If one argument is provided, that arg's internal flags are
       used to determine the appropriate function to call.
       Dies if that argument is an NV - allowing an NV argument makes
-      it very easy to inadvertently assign an unintended value.
+      it very easy to inadvertently assign an unintended value, and
+      is therefore now disallowed.
 
      #######################
      # Assign using STRtoD64
@@ -1351,7 +1360,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       IV,UV,NV,PV, Math::Decimal64 object) to the
        Math::Decimal64 object, $d64.
 
-      eg: assignPV($d64, '123459e-6'); # 0.123459
+      eg: assignPV($d64, '12.3459e-6'); # 0.0000123459
 
      ################
      assignNaN($d64);
@@ -1424,8 +1433,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
       Returns a string in floating point format (as distinct from
       scientific notation) - ie as 0.123 instead of 123e-3.
-      And, yes, the _Decimal64 value 123e201 will be returned as a
-      string consisting of '123' followed by 201 zeroes.
+      And, yes, (eg) the _Decimal64 value 123e201 will be returned
+      as a string consisting of '123' followed by 201 zeroes.
 
      #######################################
      $rstring = D64toRSTR($d64, $places);
