@@ -1,4 +1,5 @@
 0.10
+ - Add PV overloading.
  - Rewrite assignPV in XS. (Now uses _atodecimal XSub.)
  - Rewrite PVtoD64. (Now uses _atodecimal XSub.)
  - Remove (unused) XSubs _c2ld() and _c2d().
