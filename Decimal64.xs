@@ -34,6 +34,41 @@ long long add_on[54] = {1ll,2ll, 4ll, 8ll, 16ll, 32ll, 64ll, 128ll, 256ll, 512ll
                         281474976710656ll, 562949953421312ll, 1125899906842624ll, 2251799813685248ll,
                         4503599627370496ll, 9007199254740992ll};
 
+_Decimal64 _exp10 (int power) {
+
+  _Decimal64 ret = 1.DD;
+
+  if(power < 0) {
+    while(power < -100) {
+      ret *= 1e-100DD;
+      power += 100;
+    }
+    while(power < -10) {
+      ret *= 1e-10DD;
+      power += 10;
+    }
+    while(power) {
+      ret *= 1e-1DD;
+      power++;
+    }
+  }
+  else {
+    while(power > 100) {
+      ret *= 1e100DD;
+      power -= 100;
+    }
+    while(power > 10) {
+      ret *= 1e10DD;
+      power -= 10;
+    }
+    while(power) {
+      ret *= 1e1DD;
+      power--;
+    }
+  }
+  return ret;
+}
+
 int  _is_nan(_Decimal64 x) {
      if(x == x) return 0;
      return 1;
@@ -107,6 +142,73 @@ _Decimal64 _get_inf(int sign) {
 _Decimal64 _get_nan(void) {
      _Decimal64 inf = _get_inf(1);
      return inf/inf;
+}
+
+_Decimal64 _atodecimal(char *s) {
+  /* plagiarising code available at
+  https://www.ibm.com/developerworks/community/wikis/home?lang=en_US#!/wiki/Power%20Systems/page/POWER6%20Decimal%20Floating%20Point%20(DFP) */
+  _Decimal64 top = 0.DD, bot = 0.DD, result = 0.DD, div = 10.DD;
+  int negative = 0, i = 0, exponent = 0;
+
+  if(s[0] == '-') {
+    negative = -1;
+    s++;
+  }
+  if(s[0] == '+') {
+    s++;
+  }
+
+  /* 'e' and 'E' are acceptable later on - but not accepatable at this point */
+  if(s[0] == 'e' || s[0] == 'E') return 0.DD;
+
+  if((s[0] == 'i' || s[0] == 'I') &&
+     (s[1] == 'n' || s[1] == 'N') &&
+     (s[2] == 'f' || s[2] == 'F')) return _get_inf(negative);
+
+  if((s[0] == 'n' || s[0] == 'N') &&
+     (s[1] == 'a' || s[1] == 'A') &&
+     (s[2] == 'n' || s[2] == 'N')) return _get_nan();
+
+  for(; isdigit(*s); s++) {
+    top = top * 10.DD;
+    top = top + *s - '0';
+  }
+  if(*s == '.') {
+    s++;
+    for(i = 0; isdigit(s[i]) ;i++) {
+      bot += (_Decimal64)(s[i] - '0') / (_Decimal64)div;
+      div *= 10.DD;
+    }
+  }
+  result = top + bot;
+  if(negative) result = -result;
+
+  if(result == 0.DD) return result;
+
+  if(s[i] == 'e' || s[i] == 'E') {
+    s += i + 1;
+    if(*s == '-') {
+      s++;
+      for(i = 0; isdigit(s[i]);i++) exponent = (exponent * 10) + (s[i] - '0');
+      while(exponent > 398) {
+        result /= 10.DD;
+        exponent--;
+      }
+      result *= _exp10(-exponent);
+      return result;
+    }
+    if(*s == '+') s++;
+    for(i = 0; isdigit(s[i]);i++) exponent = (exponent * 10) + (s[i] - '0');
+    while(exponent > 384) {
+      result *= 10.DD;
+      exponent--;
+    }
+    result *= _exp10(exponent);
+    return result;
+
+  }
+
+  return result;
 }
 
 SV * _DEC64_MAX(pTHX) {
@@ -235,29 +337,29 @@ SV * Exp10(pTHX_ int power) {
      *d64 = 1.0DD;
      if(power < 0) {
        while(power < -100) {
-         *d64 *= 1e-100DL;
+         *d64 *= 1e-100DD;
          power += 100;
        }
        while(power < -10) {
-         *d64 *= 1e-10DL;
+         *d64 *= 1e-10DD;
          power += 10;
        }
        while(power) {
-         *d64 *= 1e-1DL;
+         *d64 *= 1e-1DD;
          power++;
        }
      }
      else {
        while(power > 100) {
-         *d64 *= 1e100DL;
+         *d64 *= 1e100DD;
          power -= 100;
        }
        while(power > 10) {
-         *d64 *= 1e10DL;
+         *d64 *= 1e10DD;
          power -= 10;
        }
        while(power) {
-         *d64 *= 1e1DL;
+         *d64 *= 1e1DD;
          power--;
        }
      }
@@ -369,15 +471,9 @@ SV * IVtoD64(pTHX_ SV * x) {
      return obj_ref;
 }
 
-/*
-Currently using perl sub of the same name.
 SV * PVtoD64(pTHX_ char * x) {
      _Decimal64 * d64;
-     long double temp;
-     char * ptr;
      SV * obj_ref, * obj;
-
-     temp = strtold(x, &ptr);
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in PVtoD64 function");
@@ -385,13 +481,12 @@ SV * PVtoD64(pTHX_ char * x) {
      obj_ref = newSV(0);
      obj = newSVrv(obj_ref, "Math::Decimal64");
 
-     *d64 = (_Decimal64)temp;
+     *d64 = _atodecimal(x);
 
      sv_setiv(obj, INT2PTR(IV,d64));
      SvREADONLY_on(obj);
      return obj_ref;
 }
-*/
 
 SV * STRtoD64(pTHX_ char * x) {
 #ifdef STRTOD64_AVAILABLE
@@ -472,16 +567,10 @@ void _assignME(pTHX_ SV * a, char * mantissa, SV * c) {
      }
 }
 
-/*
-Currently using perl sub of the same name
 
-void assignPV(pTHX_ SV * a, char * str) {
-     char * ptr;
-     long double man = strtold(str, &ptr);
-
-     *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = (_Decimal64)man;
+void assignPV(pTHX_ SV * a, char * s) {
+     *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = _atodecimal(s);
 }
-*/
 
 void assignIV(pTHX_ SV * a, SV * val) {
 
@@ -1435,6 +1524,13 @@ CODE:
 OUTPUT:  RETVAL
 
 SV *
+PVtoD64 (x)
+	char *	x
+CODE:
+  RETVAL = PVtoD64 (aTHX_ x);
+OUTPUT:  RETVAL
+
+SV *
 STRtoD64 (x)
 	char *	x
 CODE:
@@ -1512,6 +1608,23 @@ _assignME (a, mantissa, c)
         PPCODE:
         temp = PL_markstack_ptr++;
         _assignME(aTHX_ a, mantissa, c);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+assignPV (a, s)
+	SV *	a
+	char *	s
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        assignPV(aTHX_ a, s);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
