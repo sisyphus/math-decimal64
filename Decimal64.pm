@@ -1424,7 +1424,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       $Math::Decimal64::fmt will tell you which encoding is in use,
       as also will the d64_fmt() subroutine.
 
-     #######################################
+     ###########################
      $fstring = D64toFSTR($d64);
 
       Returns a string in floating point format (as distinct from
@@ -1432,7 +1432,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       And, yes, (eg) the _Decimal64 value 123e201 will be returned
       as a string consisting of '123' followed by 201 zeroes.
 
-     #######################################
+     ####################################
      $rstring = D64toRSTR($d64, $places);
       Same as D64toFSTR() but the returned string has been rounded
       (to nearest, ties to even) to the number of decimal places
@@ -1441,7 +1441,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
      #######################################
      ($mantissa, $exponent) = D64toME($d64);
-      Returns the value of the Math::Decimal object as a
+      Returns the value of the Math::Decimal64 object as a
       mantissa (string of up to 16 decimal digits) and exponent.
       You can then manipulate those values to output the
       value in your preferred format. Afaik, the value will be
