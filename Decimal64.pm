@@ -28,6 +28,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     assignIV assignUV assignNV assignD64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
+    nnumflag clear_nnum set_nnum
     );
 
 %Math::Decimal64::EXPORT_TAGS = (all => [qw(
@@ -39,6 +40,7 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     assignIV assignUV assignNV assignD64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
+    nnumflag clear_nnum set_nnum
     )]);
 
 use overload
@@ -1204,8 +1206,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
     The following create and assign a new Math::Decimal64 object.
 
-     ######################
-     # Assign from a string
+     ##################################
+     # Create, and assign from a string
      $d64 = PVtoD64($string);
 
       eg: $d64 = PVtoD64('-9427199254740993');
@@ -1215,12 +1217,14 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
           $d64 = Math::Decimal64->new('-inf');
           $d64 = Math::Decimal64->new('nan');
 .
-      Does no checks on its arg. Illegal characters will be treated in
-      the same way as perl treats them - but no warnings will be issued
-      if illegal characters are detected. The arg can be in either
-      integer format, scientific notation, float format or (+-)inf/nan.
-      Doing Math::Decimal64->new($string) will also create and
-      assign using PVtoD64().
+      The perl API function looks_like_number() is run on the arg. If
+      it returns false, then a global non-numeric flag which was
+      initialised to 0 is incremented. The nnumflag function returns
+      the current value of this global. It can be cleared to 0 by
+      running clear_nnum() and set to 1 with set_nnum(). The arg can be
+      in either integer format, scientific notation, float format or
+      (+-)inf/nan. Doing Math::Decimal64->new($string) will also create
+      and assign using PVtoD64().
       PVtoD64 is now a much improved way of creating and assigning - so
       much so that I'm now recommending it as the preferred way of
       creating a Math::Decimal64 object.
@@ -1230,8 +1234,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
        or simply:
        $d64 = PVtoD64($mantissa . 'e' . $exponent);
 
-     ###################################
-     # Assign from mantissa and exponent
+     ###############################################
+     # Create, and assign from mantissa and exponent
      $d64 = MEtoD64($mantissa, $exponent);
 
       eg: $d64 = MEtoD64('12345', -3); # 12.345
@@ -1245,12 +1249,13 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       Doing Math::Decimal64->new($mantissa, $exponent) will also
       create and assign using MEtoD64(), and is equally acceptable.
 
-     ######################################
+     ###############################################
+     # Create, and assign from mantissa and exponent
      $d64 = DPDtoD64($mantissa, $exponent);
 
       eg: $d64 = DPDtoD64('12345', -3); # 12.345
 
-      This perhaps a quicker way of creating the Math::Decimal64
+      This is perhaps a quicker way of creating the Math::Decimal64
       object with the intended value - but works only for DPD format
       - ie only if d64_fmt() returns 'DPD'.
       The mantissa string can be 'inf' or 'nan', optionally prefixed
@@ -1258,8 +1263,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       represent an integer value (with implied '.0' at the end) - ie
       cannot contain a decimal point.
 
-     #####################################
-     # Assign from a UV (unsigned integer)
+     #################################################
+     # Create, and assign from a UV (unsigned integer)
      $d64 = UVtoD64($uv);
 
       eg: $d64 = UVtoD64(~0);
@@ -1270,8 +1275,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       (but only to the extent that the _Decimal64 can accommodate
       the value of the UV).
 
-     ####################################
-     # Assign from an IV (signed integer)
+     ################################################
+     # Create, and assign from an IV (signed integer)
      $d64 = IVtoD64($iv);
 
       eg: $d64 = IVtoD64(-15); # -15.0
@@ -1282,15 +1287,15 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       (but only to the extent that the _Decimal64 can accommodate
       the value of the IV).
 
-     ################################################
-     # Assign from an existing Math::Decimal64 object
+     ############################################################
+     # Create, and assign from an existing Math::Decimal64 object
      $d64 = D64toD64($d64_0);
      Also:
       $d64 = Math::Decimal64->new($d64_0);
       $d64 = $d64_0; # uses overloaded '='
 
-     ###########################
-     # Assign from an NV (real))
+     #######################################
+     # Create, and assign from an NV (real))
      $d64 = NVtoD64($nv);
 
       eg: $d64 = NVtoD64(-3.25);
@@ -1301,8 +1306,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       be fine for assigning decimal values that have en exact base 2
       representation. (Eg, see test 5 in t/overload_cmp.t.)
 
-     ####################
-     # Assign using new()
+     ################################
+     # Create, and assign using new()
      $d64 = Math::Decimal64->new([$arg1, [$arg2]]);
       This function calls one of the above functions. It
       determines the appropriate function to call by examining
@@ -1316,8 +1321,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       it very easy to inadvertently assign an unintended value, and
       is therefore now disallowed.
 
-     #######################
-     # Assign using STRtoD64
+     ###################################
+     # Create, and assign using STRtoD64
      $d64 = STRtoD64($string);
       If your C compiler provides the strtod64 function, and
       you configured the Makefile.PL to enable access to that
@@ -1480,6 +1485,26 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
      #########
 
 =head1 OTHER FUNCTIONS
+
+     #################
+     $iv = nnumflag();
+      Returns the value of the non-numeric flag. This flag is
+      initialized to zero, but incemented by 1 whenever the
+      _atodecimal function (used internally by assignPV and
+      PVtoD64) is handed a string containing non-numeric
+      characters. The value of the flag therefore tells us how
+      many times _atodecimal() was handed such a string. The flag
+      can be reset to 0 by running set_nnum(0).
+
+     ##############
+     set_nnum($iv);
+      Resets the global non-numeric flag to the value specified by
+      $iv.
+
+     #############
+     clear_nnum();
+      Resets the global non-numeric flag to 0.(Essentially the same
+      as running set_nnum(0).)
 
      ################################
      ($man, $exp) = PVtoME($string);
