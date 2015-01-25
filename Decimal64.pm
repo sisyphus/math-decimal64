@@ -1214,10 +1214,11 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
           $d64 = Math::Decimal64->new('-9307199254740993e-23');
           $d64 = Math::Decimal64->new('-inf');
           $d64 = Math::Decimal64->new('nan');
-
-      Not guaranteed to work correctly if the string contains space(s).
-      Does no checks on its arg. The arg can be in either integer
-      format or scientific notation, float format or (+-)inf/nan.
+.
+      Does no checks on its arg. Illegal characters will be treated in
+      the same way as perl treats them - but no warnings will be issued
+      if illegal characters are detected. The arg can be in either
+      integer format, scientific notation, float format or (+-)inf/nan.
       Doing Math::Decimal64->new($string) will also create and
       assign using PVtoD64().
       PVtoD64 is now a much improved way of creating and assigning - so
@@ -1350,7 +1351,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
      assignIV ($d64, $iv);
      assignUV ($d64, $uv);
      assignNV ($d64, $nv);
-     assignPV ($d64, $string);
+     assignPV ($d64, $string); # See PVtoD64 doc (above)
      assignD64($d64, $d64_0);
       Assigns the value represented by the second arg (resp. the
       IV,UV,NV,PV, Math::Decimal64 object) to the
