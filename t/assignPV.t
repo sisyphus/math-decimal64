@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Math::Decimal64 qw(:all);
 
-my $t = 64;
+my $t = 83;
 
 print "1..$t\n";
 
@@ -604,6 +604,165 @@ else {
   print "not ok 64\n";
 }
 
+#############################
+# Do some checks for spaces #
+#############################
+
+assignPV($d64, '- 23');
+
+if("$d64" eq '-0') {print "ok 65\n"}
+else {
+  warn "\nExpected -0\nGot $d64\n";
+  print "not ok 65\n";
+}
+
+assignPV($d64, " \r \n \t \f -23e-2");
+
+if("$d64" eq '-23e-2') {print "ok 66\n"}
+else {
+  warn "\nExpected -23e-2\nGot $d64\n";
+  print "not ok 66\n";
+}
+
+assignPV($d64, " \r \n \t \f -23 e-2");
+
+if("$d64" eq '-23e0') {print "ok 67\n"}
+else {
+  warn "\nExpected -23e0\nGot $d64\n";
+  print "not ok 67\n";
+}
+
+assignPV($d64, " -23e -2");
+
+if("$d64" eq '-23e0') {print "ok 68\n"}
+else {
+  warn "\nExpected -23e0\nGot $d64\n";
+  print "not ok 68\n";
+}
+
+assignPV($d64, "2 3e-2");
+
+if("$d64" eq '2e0') {print "ok 69\n"}
+else {
+  warn "\nExpected 2e0\nGot $d64\n";
+  print "not ok 69\n";
+}
+
+assignPV($d64, ' inf  ');
+
+if(is_InfD64($d64) == 1) {print "ok 70\n"}
+else {
+  warn "Inf: $d64\n";
+  print "not ok 70\n";
+}
+
+assignPV($d64, ' +inf  ');
+
+if(is_InfD64($d64) == 1) {print "ok 71\n"}
+else {
+  warn "Inf: $d64\n";
+  print "not ok 71\n";
+}
+
+assignPV($d64, ' -0.162.235');
+
+if("$d64" eq '-162e-3') {print "ok 72\n"}
+else {
+  warn "\nExpected -162e-3\nGot $d64\n";
+  print "not ok 72\n";
+}
+
+###################################
+# Do some checks for non-numerics #
+###################################
+
+assignPV($d64, '-a23');
+
+if("$d64" eq '-0') {print "ok 73\n"}
+else {
+  warn "\nExpected -0\nGot $d64\n";
+  print "not ok 73\n";
+}
+
+assignPV($d64, " \r \n \t \f -23e-2.");
+
+if("$d64" eq '-23e-2') {print "ok 74\n"}
+else {
+  warn "\nExpected -23e-2\nGot $d64\n";
+  print "not ok 74\n";
+}
+
+assignPV($d64, " \r \n \t \f -23ae-2");
+
+if("$d64" eq '-23e0') {print "ok 75\n"}
+else {
+  warn "\nExpected -23e0\nGot $d64\n";
+  print "not ok 75\n";
+}
+
+assignPV($d64, " -23ea-2");
+
+if("$d64" eq '-23e0') {print "ok 76\n"}
+else {
+  warn "\nExpected -23e0\nGot $d64\n";
+  print "not ok 76\n";
+}
+
+assignPV($d64, "2a3e-2");
+
+if("$d64" eq '2e0') {print "ok 77\n"}
+else {
+  warn "\nExpected 2e0\nGot $d64\n";
+  print "not ok 77\n";
+}
+
+assignPV($d64, ' infa ');
+
+if(is_InfD64($d64) == 1) {print "ok 78\n"}
+else {
+  warn "Inf: $d64\n";
+  print "not ok 78\n";
+}
+
+assignPV($d64, ' +infa  ');
+
+if(is_InfD64($d64) == 1) {print "ok 79\n"}
+else {
+  warn "Inf: $d64\n";
+  print "not ok 79\n";
+}
+
+assignPV($d64, ' -0.162.a235');
+
+if("$d64" eq '-162e-3') {print "ok 80\n"}
+else {
+  warn "\nExpected -162e-3\nGot $d64\n";
+  print "not ok 80\n";
+}
+
+assignPV($d64, 'a23');
+
+if("$d64" eq '0') {print "ok 81\n"}
+else {
+  warn "\nExpected 0\nGot $d64\n";
+  print "not ok 81\n";
+}
+
+assignPV($d64, 'ae23');
+
+if("$d64" eq '0') {print "ok 82\n"}
+else {
+  warn "\nExpected 0\nGot $d64\n";
+  print "not ok 82\n";
+}
+
+assignPV($d64, 'a.23');
+
+if("$d64" eq '0') {print "ok 83\n"}
+else {
+  warn "\nExpected 0\nGot $d64\n";
+  print "not ok 83\n";
+}
 
 sub random_select {
   my $ret = '';
