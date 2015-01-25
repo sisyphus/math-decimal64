@@ -433,7 +433,7 @@ assignPV($d64, '-46.98317e180');
 if("$d64" eq '-4698317e175' && nnumflag() == 0) {print "ok 43\n"}
 else {
   warn "\nExpected -4698317e175\nGot $d64\n";
-  warn "nnnumflag expected 0, got ", nnumflag(), "\n";
+  warn "nnumflag expected 0, got ", nnumflag(), "\n";
   print "not ok 43\n";
 }
 
@@ -442,7 +442,7 @@ assignPV($d64, '-46.98317e180z1');
 if("$d64" eq '-4698317e175' && nnumflag() == 1) {print "ok 44\n"}
 else {
   warn "\nExpected -4698317e175\nGot $d64\n";
-  warn "nnnumflag expected 1, got ", nnumflag(), "\n";
+  warn "nnumflag expected 1, got ", nnumflag(), "\n";
   print "not ok 44\n";
 }
 
@@ -570,7 +570,7 @@ assignPV($d64, '-0.6e385');
 if("$d64" eq '-6e384' && nnumflag() == 1) {print "ok 60\n"}
 else {
   warn "\nExpected -6e384\nGot $d64\n";
-  warn "nnnumflag expected 1, got ", nnumflag(), "\n";
+  warn "nnumflag expected 1, got ", nnumflag(), "\n";
   print "not ok 60\n";
 }
 
@@ -603,7 +603,7 @@ assignPV($d64, ' ');
 if("$d64" eq '0' && nnumflag() == 5) {print "ok 64\n"}
 else {
   warn "\nExpected 0\nGot $d64\n";
-  warn "nnnumflag expected 1, got ", nnumflag(), "\n";
+  warn "nnumflag expected 1, got ", nnumflag(), "\n";
   print "not ok 64\n";
 }
 
@@ -616,7 +616,7 @@ assignPV($d64, '- 23');
 if("$d64" eq '-0' && nnumflag() == 6) {print "ok 65\n"}
 else {
   warn "\nExpected -0\nGot $d64\n";
-  warn "nnnumflag expected 6, got ", nnumflag(), "\n";
+  warn "nnumflag expected 6, got ", nnumflag(), "\n";
   print "not ok 65\n";
 }
 
@@ -633,7 +633,7 @@ assignPV($d64, " \r \n \t \f -23 e-2");
 if("$d64" eq '-23e0' && nnumflag() == 7) {print "ok 67\n"}
 else {
   warn "\nExpected -23e0\nGot $d64\n";
-  warn "nnnumflag expected 7, got ", nnumflag(), "\n";
+  warn "nnumflag expected 7, got ", nnumflag(), "\n";
   print "not ok 67\n";
 }
 
@@ -650,7 +650,7 @@ assignPV($d64, "2 3e-2");
 if("$d64" eq '2e0' && nnumflag() == 9) {print "ok 69\n"}
 else {
   warn "\nExpected 2e0\nGot $d64\n";
-  warn "nnnumflag expected 9, got ", nnumflag(), "\n";
+  warn "nnumflag expected 9, got ", nnumflag(), "\n";
   print "not ok 69\n";
 }
 
@@ -675,7 +675,7 @@ assignPV($d64, ' -0.162.235');
 if("$d64" eq '-162e-3' && nnumflag() == 10) {print "ok 72\n"}
 else {
   warn "\nExpected -162e-3\nGot $d64\n";
-  warn "nnnumflag expected 10, got ", nnumflag(), "\n";
+  warn "nnumflag expected 10, got ", nnumflag(), "\n";
   print "not ok 72\n";
 }
 
@@ -688,7 +688,7 @@ assignPV($d64, '-a23');
 if("$d64" eq '-0' && nnumflag() == 11) {print "ok 73\n"}
 else {
   warn "\nExpected -0\nGot $d64\n";
-  warn "nnnumflag expected 11, got ", nnumflag(), "\n";
+  warn "nnumflag expected 11, got ", nnumflag(), "\n";
   print "not ok 73\n";
 }
 
@@ -705,7 +705,7 @@ assignPV($d64, " \r \n \t \f -23ae-2");
 if("$d64" eq '-23e0' && nnumflag() == 13) {print "ok 75\n"}
 else {
   warn "\nExpected -23e0\nGot $d64\n";
-  warn "nnnumflag expected 13, got ", nnumflag(), "\n";
+  warn "nnumflag expected 13, got ", nnumflag(), "\n";
   print "not ok 75\n";
 }
 
@@ -770,7 +770,7 @@ assignPV($d64, 'a.23');
 if("$d64" eq '0' && nnumflag() == 21) {print "ok 83\n"}
 else {
   warn "\nExpected 0\nGot $d64\n";
-  warn "nnnumflag expected 21, got ", nnumflag(), "\n";
+  warn "nnumflag expected 21, got ", nnumflag(), "\n";
   print "not ok 83\n";
 }
 
