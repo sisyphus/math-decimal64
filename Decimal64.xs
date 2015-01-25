@@ -150,6 +150,8 @@ _Decimal64 _atodecimal(char *s) {
   _Decimal64 top = 0.DD, bot = 0.DD, result = 0.DD, div = 10.DD;
   int negative = 0, i = 0, exponent = 0;
 
+  while(s[0] == ' ' || s[0] == '\t' || s[0] == '\n' || s[0] == '\r' || s[0] == '\f') s++;
+
   if(s[0] == '-') {
     negative = -1;
     s++;
