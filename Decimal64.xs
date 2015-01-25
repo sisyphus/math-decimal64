@@ -23,6 +23,8 @@
 
 typedef _Decimal64 D64;
 
+int nnum = 0;
+
 long long add_on[54] = {1ll,2ll, 4ll, 8ll, 16ll, 32ll, 64ll, 128ll, 256ll, 512ll, 1024ll, 2048ll,
                         4096ll, 8192ll, 16384ll, 32768ll, 65536ll, 131072ll, 262144ll, 524288ll,
                         1048576ll, 2097152ll, 4194304ll, 8388608ll, 16777216ll, 33554432ll,
@@ -144,11 +146,13 @@ _Decimal64 _get_nan(void) {
      return inf/inf;
 }
 
-_Decimal64 _atodecimal(char *s) {
+_Decimal64 _atodecimal(pTHX_ char * s) {
   /* plagiarising code available at
   https://www.ibm.com/developerworks/community/wikis/home?lang=en_US#!/wiki/Power%20Systems/page/POWER6%20Decimal%20Floating%20Point%20(DFP) */
   _Decimal64 top = 0.DD, bot = 0.DD, result = 0.DD, div = 10.DD;
   int negative = 0, i = 0, exponent = 0;
+
+  if(!looks_like_number(newSVpv(s, 0))) nnum++; /* set the "nnum" gloabal */
 
   while(s[0] == ' ' || s[0] == '\t' || s[0] == '\n' || s[0] == '\r' || s[0] == '\f') s++;
 
@@ -483,7 +487,7 @@ SV * PVtoD64(pTHX_ char * x) {
      obj_ref = newSV(0);
      obj = newSVrv(obj_ref, "Math::Decimal64");
 
-     *d64 = _atodecimal(x);
+     *d64 = _atodecimal(aTHX_ x);
 
      sv_setiv(obj, INT2PTR(IV,d64));
      SvREADONLY_on(obj);
@@ -571,7 +575,7 @@ void _assignME(pTHX_ SV * a, char * mantissa, SV * c) {
 
 
 void assignPV(pTHX_ SV * a, char * s) {
-     *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = _atodecimal(s);
+     *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) = _atodecimal(aTHX_ s);
 }
 
 void assignIV(pTHX_ SV * a, SV * val) {
@@ -676,7 +680,7 @@ SV * _overload_add(pTHX_ SV * a, SV * b, SV * third) {
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) + _atodecimal(SvPV_nolen(b));
+      *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) + _atodecimal(aTHX_ SvPV_nolen(b));
       return obj_ref;
     }
 
@@ -716,7 +720,7 @@ SV * _overload_mul(pTHX_ SV * a, SV * b, SV * third) {
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) * _atodecimal(SvPV_nolen(b));
+      *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) * _atodecimal(aTHX_ SvPV_nolen(b));
       return obj_ref;
     }
 
@@ -758,8 +762,8 @@ SV * _overload_sub(pTHX_ SV * a, SV * b, SV * third) {
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      if(third == &PL_sv_yes) *d64 = _atodecimal(SvPV_nolen(b)) - *(INT2PTR(_Decimal64 *, SvIV(SvRV(a))));
-      else *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) - _atodecimal(SvPV_nolen(b));
+      if(third == &PL_sv_yes) *d64 = _atodecimal(aTHX_ SvPV_nolen(b)) - *(INT2PTR(_Decimal64 *, SvIV(SvRV(a))));
+      else *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) - _atodecimal(aTHX_ SvPV_nolen(b));
       return obj_ref;
     }
 
@@ -825,8 +829,8 @@ SV * _overload_div(pTHX_ SV * a, SV * b, SV * third) {
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      if(third == &PL_sv_yes) *d64 = _atodecimal(SvPV_nolen(b)) / *(INT2PTR(_Decimal64 *, SvIV(SvRV(a))));
-      else *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) / _atodecimal(SvPV_nolen(b));
+      if(third == &PL_sv_yes) *d64 = _atodecimal(aTHX_ SvPV_nolen(b)) / *(INT2PTR(_Decimal64 *, SvIV(SvRV(a))));
+      else *d64 = *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) / _atodecimal(aTHX_ SvPV_nolen(b));
       return obj_ref;
     }
 
@@ -854,7 +858,7 @@ SV * _overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
       return a;
     }
     if(SvPOK(b) && !SvNOK(b)) {
-      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) += _atodecimal(SvPV_nolen(b));
+      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) += _atodecimal(aTHX_ SvPV_nolen(b));
       return a;
     }
 
@@ -884,7 +888,7 @@ SV * _overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
       return a;
     }
     if(SvPOK(b) && !SvNOK(b)) {
-      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) *= _atodecimal(SvPV_nolen(b));
+      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) *= _atodecimal(aTHX_ SvPV_nolen(b));
       return a;
     }
 
@@ -914,7 +918,7 @@ SV * _overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
       return a;
     }
     if(SvPOK(b) && !SvNOK(b)) {
-      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) -= _atodecimal(SvPV_nolen(b));
+      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) -= _atodecimal(aTHX_ SvPV_nolen(b));
       return a;
     }
 
@@ -944,7 +948,7 @@ SV * _overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
       return a;
     }
     if(SvPOK(b) && !SvNOK(b)) {
-      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) /= _atodecimal(SvPV_nolen(b));
+      *(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) /= _atodecimal(aTHX_ SvPV_nolen(b));
       return a;
     }
 
@@ -973,7 +977,7 @@ SV * _overload_equiv(pTHX_ SV * a, SV * b, SV * third) {
        return newSViv(0);
      }
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) == _atodecimal(SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) == _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
        return newSViv(0);
      }
 
@@ -1000,7 +1004,7 @@ SV * _overload_not_equiv(pTHX_ SV * a, SV * b, SV * third) {
        return newSViv(0);
      }
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) != _atodecimal(SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) != _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
        return newSViv(0);
      }
 
@@ -1028,7 +1032,7 @@ SV * _overload_lt(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) < _atodecimal(SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) < _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
        return newSViv(0);
      }
 
@@ -1056,7 +1060,7 @@ SV * _overload_gt(pTHX_ SV * a, SV * b, SV * third) {
     }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) > _atodecimal(SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) > _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
        return newSViv(0);
      }
 
@@ -1084,7 +1088,7 @@ SV * _overload_lte(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) <= _atodecimal(SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) <= _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
        return newSViv(0);
      }
 
@@ -1112,7 +1116,7 @@ SV * _overload_gte(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) >= _atodecimal(SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) >= _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
        return newSViv(0);
      }
 
@@ -1144,9 +1148,9 @@ SV * _overload_spaceship(pTHX_ SV * a, SV * b, SV * third) {
     }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) > _atodecimal(SvPV_nolen(b))) return newSViv(1);
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) < _atodecimal(SvPV_nolen(b))) return newSViv(-1);
-       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) == _atodecimal(SvPV_nolen(b))) return newSViv(0);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) > _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) < _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(-1);
+       if(*(INT2PTR(_Decimal64 *, SvIV(SvRV(a)))) == _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(0);
       return &PL_sv_undef; /* Math::Decimal64 object (1st arg) is a nan */
      }
 
@@ -1485,6 +1489,19 @@ void _assignDPD(pTHX_ SV * a, char * in) {
 
   *(INT2PTR(D64 *, SvIV(SvRV(a)))) = out;
 }
+
+int nnumflag() {
+  return nnum;
+}
+
+void clear_nnum() {
+  nnum = 0;
+}
+
+void set_nnum(int x) {
+  nnum = x;
+}
+
 
 
 MODULE = Math::Decimal64  PACKAGE = Math::Decimal64
@@ -2111,6 +2128,40 @@ _assignDPD (a, in)
         PPCODE:
         temp = PL_markstack_ptr++;
         _assignDPD(aTHX_ a, in);
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+int
+nnumflag ()
+
+void
+clear_nnum ()
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        clear_nnum();
+        if (PL_markstack_ptr != temp) {
+          /* truly void, because dXSARGS not invoked */
+          PL_markstack_ptr = temp;
+          XSRETURN_EMPTY; /* return empty stack */
+        }
+        /* must have used dXSARGS; list context implied */
+        return; /* assume stack size is correct */
+
+void
+set_nnum (x)
+	int	x
+        PREINIT:
+        I32* temp;
+        PPCODE:
+        temp = PL_markstack_ptr++;
+        set_nnum(x);
         if (PL_markstack_ptr != temp) {
           /* truly void, because dXSARGS not invoked */
           PL_markstack_ptr = temp;
