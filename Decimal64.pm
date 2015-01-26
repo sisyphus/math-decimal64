@@ -530,37 +530,33 @@ sub MEtoD64 {
   # Check that 2 args are supplied
   die "MEtoD64 takes 2 args" if @_ != 2;
 
-  my $arg1 = shift;
-  my $arg2 = shift;
+  my($arg1, $arg2) = (shift, shift);
 
-  die "Invalid 1st arg ($arg1) to MEtoD64" if $arg1 =~ /[^0-9\-]/;
-  die "Invalid 2nd arg ($arg2) to MEtoD64" if $arg2 =~ /[^0-9\-]/;
+  die "Invalid 1st arg ($arg1) to MEtoD64" if $arg1 =~ /[^0-9\-\+]/;
+  die "Invalid 2nd arg ($arg2) to MEtoD64" if $arg2 =~ /[^0-9\-\+]/;
+
+  $arg1 =~ s/^\+//;
+  $arg2 =~ s/^\+//;
+  my $sign = $arg1 =~ s/^\-// ? '-' : '';
 
   my $len_1 = length $arg1;
-  $len_1-- if $arg1 =~ /^\-/;
 
   if($len_1 >= 16 || $arg2 < -398) {
-    die "$arg1 exceeds _Decimal64 precision. It needs to be shortened to no more than 16 decimal digits"
+    die "${sign}${arg1} exceeds _Decimal64 precision. It needs to be shortened to no more than 16 decimal digits"
       if $len_1 > 16;
     ($arg1, $arg2) = _round_as_needed($arg1, $arg2) if $arg2 < -398;
 
     # Need to handle the possibility that strtold can't handle all 16-digit values correctly.
     if($Config{longdblsize} == 8) {
-      $len_1 = length $arg1;
-      my ($sign, $inc) = ('', 0);
-      if($arg1 =~ /^\-/) {
-        $len_1--;
-        $sign = '-';
-        $inc++;
-      }
-      if($len_1 == 16) {
-        return _MEtoD64($sign . substr($arg1, 0 + $inc, 8), $arg2 + 8) +
-               _MEtoD64($sign . substr($arg1, 8 + $inc, 8), $arg2);
+      my $len = length $arg1; # length of $arg1 may have changed
+      if($len == 16) {
+        return _MEtoD64($sign . substr($arg1, 0, 8), $arg2 + 8) +
+               _MEtoD64($sign . substr($arg1, 8, 8), $arg2);
       }
     }
   }
 
-  return _MEtoD64($arg1, $arg2);
+  return _MEtoD64($sign . $arg1, $arg2);
 
 }
 
@@ -1159,7 +1155,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
    operator overloading - see "OVERLOADING".
 
    In the documentation that follows, "$mantissa" is a perl scalar
-   holding a string of up to 16 decimal digits:
+   holding a string of up to 16 decimal digits, optionally prefixed
+   with a '+' or '-' sign:
     $mantissa = '1234';
     $mantissa = '1234567890123456';
 
@@ -1272,8 +1269,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       Doing Math::Decimal64->new($uv) will also create and assign
       using UVtoD64().
       Assigns the designated UV value to the Math::Decimal64 object
-      (but only to the extent that the _Decimal64 can accommodate
-      the value of the UV).
+      (but loses precision if the _Decimal64 type has insufficient
+      precision to accommodate the precision of the IV).
 
      ################################################
      # Create, and assign from an IV (signed integer)
@@ -1284,8 +1281,8 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       Doing Math::Decimal64->new($iv) will also create and assign
       using IVtoD64().
       Assigns the designated IV value to the Math::Decimal64 object
-      (but only to the extent that the _Decimal64 can accommodate
-      the value of the IV).
+      (but loses precision if the _Decimal64 type has insufficient
+      precision to accommodate the precision of the IV).
 
      ############################################################
      # Create, and assign from an existing Math::Decimal64 object
@@ -1615,7 +1612,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
     This program is free software; you may redistribute it and/or
     modify it under the same terms as Perl itself.
-    Copyright 2012-14 Sisyphus
+    Copyright 2012-15 Sisyphus
 
 =head1 AUTHOR
 
