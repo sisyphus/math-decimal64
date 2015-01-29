@@ -23,7 +23,7 @@
 
 typedef _Decimal64 D64;
 
-int nnum = 0;
+int nnum = 0; /* flag that is incremented whenever _atodecimal is handed something non-numeric */
 
 long long add_on[54] = {1ll,2ll, 4ll, 8ll, 16ll, 32ll, 64ll, 128ll, 256ll, 512ll, 1024ll, 2048ll,
                         4096ll, 8192ll, 16384ll, 32768ll, 65536ll, 131072ll, 262144ll, 524288ll,
@@ -152,7 +152,7 @@ _Decimal64 _atodecimal(pTHX_ char * s) {
   _Decimal64 top = 0.DD, bot = 0.DD, result = 0.DD, div = 10.DD;
   int negative = 0, i = 0, exponent = 0;
 
-  if(!looks_like_number(newSVpv(s, 0))) nnum++; /* set the "nnum" gloabal */
+  if(!looks_like_number(newSVpv(s, 0))) nnum++; /* set the "nnum" global */
 
   while(s[0] == ' ' || s[0] == '\t' || s[0] == '\n' || s[0] == '\r' || s[0] == '\f') s++;
 
@@ -187,7 +187,7 @@ _Decimal64 _atodecimal(pTHX_ char * s) {
     }
   }
   result = top + bot;
-  if(negative) result = -result;
+  if(negative) result *= -1.DD;
 
   if(result == 0.DD) return result;
 
@@ -1490,11 +1490,11 @@ void _assignDPD(pTHX_ SV * a, char * in) {
   *(INT2PTR(D64 *, SvIV(SvRV(a)))) = out;
 }
 
-int nnumflag() {
+int nnumflag(void) {
   return nnum;
 }
 
-void clear_nnum() {
+void clear_nnum(void) {
   nnum = 0;
 }
 
@@ -1502,7 +1502,10 @@ void set_nnum(int x) {
   nnum = x;
 }
 
-
+int _lln(pTHX_ SV * x) {
+  if(looks_like_number(x)) return 1;
+  return 0;
+}
 
 MODULE = Math::Decimal64  PACKAGE = Math::Decimal64
 
@@ -2139,8 +2142,10 @@ _assignDPD (a, in)
 int
 nnumflag ()
 
+
 void
 clear_nnum ()
+
         PREINIT:
         I32* temp;
         PPCODE:
@@ -2169,4 +2174,11 @@ set_nnum (x)
         }
         /* must have used dXSARGS; list context implied */
         return; /* assume stack size is correct */
+
+int
+_lln (x)
+	SV *	x
+CODE:
+  RETVAL = _lln (aTHX_ x);
+OUTPUT:  RETVAL
 
