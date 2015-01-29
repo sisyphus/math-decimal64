@@ -1,4 +1,7 @@
+
 0.11
+ - Workarounds in _atodecimal() and assignPV.t to cater for broken
+   compiler/libc handling of signed zero _Decimal64 values.
 
 0.10
  - Add PV overloading.
