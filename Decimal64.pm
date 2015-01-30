@@ -11,7 +11,7 @@ require Exporter;
 *import = \&Exporter::import;
 require DynaLoader;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 #$VERSION = eval $VERSION;
 
 use subs qw(DEC64_MAX DEC64_MIN);
