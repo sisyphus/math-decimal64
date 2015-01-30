@@ -462,7 +462,7 @@ else {
 assignPV($d64, '-0e410');
 
 if("$d64" eq '-0') {print "ok 46\n"}
-elsif("$d64" eq '-0'){
+elsif("$d64" eq '0'){
   warn "\nThis compiler/libc doesn't honor sign of zero correctly\n";
   warn "This is not a failing of the module\n";
   print "ok 46\n";
@@ -603,7 +603,7 @@ else {
 assignPV($d64, '-');
 
 if("$d64" eq '-0') {print "ok 63\n"}
-elsif("$d64" eq '-0'){
+elsif("$d64" eq '0'){
   warn "\nThis compiler/libc doesn't honor sign of zero correctly\n";
   warn "This is not a failing of the module\n";
   print "ok 63\n";
@@ -629,7 +629,7 @@ else {
 assignPV($d64, '- 23');
 
 if("$d64" eq '-0' && nnumflag() == 6) {print "ok 65\n"}
-elsif("$d64" eq '-0' && nnumflag() == 6){
+elsif("$d64" eq '0' && nnumflag() == 6){
   warn "\nThis compiler/libc doesn't honor sign of zero correctly\n";
   warn "This is not a failing of the module\n";
   print "ok 65\n";
@@ -709,7 +709,7 @@ else {
 assignPV($d64, '-a23');
 
 if("$d64" eq '-0' && nnumflag() == 11) {print "ok 73\n"}
-elsif("$d64" eq '-0' && nnumflag() == 11){
+elsif("$d64" eq '0' && nnumflag() == 11){
   warn "\nThis compiler/libc doesn't honor sign of zero correctly\n";
   warn "This is not a failing of the module\n";
   print "ok 65\n";
