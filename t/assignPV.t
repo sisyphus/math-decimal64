@@ -712,7 +712,7 @@ if("$d64" eq '-0' && nnumflag() == 11) {print "ok 73\n"}
 elsif("$d64" eq '0' && nnumflag() == 11){
   warn "\nThis compiler/libc doesn't honor sign of zero correctly\n";
   warn "This is not a failing of the module\n";
-  print "ok 65\n";
+  print "ok 73\n";
 }
 else {
   warn "\nExpected -0\nGot $d64\n";
