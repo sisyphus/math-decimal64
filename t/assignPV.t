@@ -618,7 +618,7 @@ assignPV($d64, ' ');
 if("$d64" eq '0' && nnumflag() == 5) {print "ok 64\n"}
 else {
   warn "\nExpected 0\nGot $d64\n";
-  warn "nnumflag expected 1, got ", nnumflag(), "\n";
+  warn "nnumflag expected 5, got ", nnumflag(), "\n";
   print "not ok 64\n";
 }
 
@@ -722,9 +722,10 @@ else {
 
 assignPV($d64, " \r \n \t \f -23e-2.");
 
-if("$d64" eq '-23e-2') {print "ok 74\n"}
+if("$d64" eq '-23e-2' && nnumflag() == 12) {print "ok 74\n"}
 else {
   warn "\nExpected -23e-2\nGot $d64\n";
+  warn "nnumflag expected 12, got ", nnumflag(), "\n";
   print "not ok 74\n";
 }
 
