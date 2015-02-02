@@ -208,8 +208,6 @@ _Decimal64 _atodecimal(char * s) {
   result = top + bot;
   if(negative) result *= -1.DD;
 
-  if(result == 0.DD) return result;
-
   if(s[i] == 'e' || s[i] == 'E') {
     s += i + 1;
     if(*s == '-') {
