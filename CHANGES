@@ -1,6 +1,6 @@
 
 0.14
-
+ - Remove looks_like_number() from _atodecimal
 0.13
  - Third attempt at getting the assignPV.t workarounds right
 
