@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Math::Decimal64 qw(:all);
 
-my $t = 86;
+my $t = 87;
 print "1..$t\n";
 
 my $rop = Math::Decimal64->new();
@@ -821,11 +821,20 @@ else {
 
 assignPV($d64, '0 but true');
 
-if("$d64" eq '0' && nnumflag() == 1) {print "ok 86\n"}
+if("$d64" eq '0' && nnumflag() == 0) {print "ok 86\n"}
+else {
+  warn "\nExpected 0\nGot $d64\n";
+  warn "nnumflag expected 0, got ", nnumflag(), "\n";
+  print "not ok 86\n";
+}
+
+assignPV($d64, '0 But true');
+
+if("$d64" eq '0' && nnumflag() == 1) {print "ok 87\n"}
 else {
   warn "\nExpected 0\nGot $d64\n";
   warn "nnumflag expected 1, got ", nnumflag(), "\n";
-  print "not ok 86\n";
+  print "not ok 87\n";
 }
 
 
