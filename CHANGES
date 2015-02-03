@@ -1,6 +1,8 @@
 
 0.14
  - Remove looks_like_number() from _atodecimal
+ - No longer export nnumflag(), set_nnum() and clear_nnum().
+
 0.13
  - Third attempt at getting the assignPV.t workarounds right
 
