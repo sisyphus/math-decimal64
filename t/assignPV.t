@@ -2,6 +2,10 @@ use strict;
 use warnings;
 use Math::Decimal64 qw(:all);
 
+*nnumflag   = \&Math::Decimal64::nnumflag;
+*set_nnum   = \&Math::Decimal64::set_nnum;
+*clear_nnum = \&Math::Decimal64::clear_nnum;
+
 my $t = 87;
 print "1..$t\n";
 
