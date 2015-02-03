@@ -28,7 +28,6 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     assignIV assignUV assignNV assignD64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
-    nnumflag clear_nnum set_nnum
     );
 
 %Math::Decimal64::EXPORT_TAGS = (all => [qw(
@@ -40,7 +39,6 @@ DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
     assignIV assignUV assignNV assignD64
     decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
-    nnumflag clear_nnum set_nnum
     )]);
 
 use overload
@@ -1484,7 +1482,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 =head1 OTHER FUNCTIONS
 
      #################
-     $iv = nnumflag();
+     $iv = Math::Decimal64::nnumflag(); # not exported
       Returns the value of the non-numeric flag. This flag is
       initialized to zero, but incemented by 1 whenever the
       _atodecimal function (used internally by assignPV and
@@ -1494,12 +1492,12 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       can be reset to 0 by running clear_nnum().
 
      ##############
-     set_nnum($iv);
+     Math::Decimal64::set_nnum($iv); # not exported
       Resets the global non-numeric flag to the value specified by
       $iv.
 
      #############
-     clear_nnum();
+     Math::Decimal64::clear_nnum(); # not exported
       Resets the global non-numeric flag to 0.(Essentially the same
       as running set_nnum(0).)
 
