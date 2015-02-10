@@ -6,7 +6,7 @@ use Math::Decimal64 qw(:all);
 *set_nnum   = \&Math::Decimal64::set_nnum;
 *clear_nnum = \&Math::Decimal64::clear_nnum;
 
-my $t = 87;
+my $t = 90;
 print "1..$t\n";
 
 my $rop = Math::Decimal64->new();
@@ -839,6 +839,33 @@ else {
   warn "\nExpected 0\nGot $d64\n";
   warn "nnumflag expected 1, got ", nnumflag(), "\n";
   print "not ok 87\n";
+}
+
+assignPV($d64, 'InfiniTy');
+
+if(is_InfD64($d64) && nnumflag() == 1) {print "ok 88\n"}
+else {
+  warn "\nExpected inf\nGot $d64\n";
+  warn "nnumflag expected 1, got ", nnumflag(), "\n";
+  print "not ok 88\n";
+}
+
+assignPV($d64, 'infinit');
+
+if(is_InfD64($d64) && nnumflag() == 2) {print "ok 89\n"}
+else {
+  warn "\nExpected inf\nGot $d64\n";
+  warn "nnumflag expected 2, got ", nnumflag(), "\n";
+  print "not ok 89\n";
+}
+
+assignPV($d64, 'infinity 0');
+
+if(is_InfD64($d64) && nnumflag() == 3) {print "ok 90\n"}
+else {
+  warn "\nExpected inf\nGot $d64\n";
+  warn "nnumflag expected 3, got ", nnumflag(), "\n";
+  print "not ok 90\n";
 }
 
 
