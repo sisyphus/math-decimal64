@@ -1211,15 +1211,17 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
           $d64 = Math::Decimal64->new('-9307199254740993e-23');
           $d64 = Math::Decimal64->new('-inf');
           $d64 = Math::Decimal64->new('nan');
-      If the string arg contains characters that don't make sense in
-      numeric context, then a global non-numeric flag which was
-      initialised to 0 is incremented - and the value assigned is in
-      accordance with perl's usual rules. The nnumflag function returns
-      the current value of the global. It can be cleared to 0 by
-      running clear_nnum() and set to x with set_nnum(x). The arg can be
-      in either integer format, scientific notation, float format or
-      (+-)inf/nan. Doing Math::Decimal64->new($string) will also create
-      and assign using PVtoD64().
+      If the string arg contains characters that (according to perl's
+      looks_like_number API function) don't make sense in numeric
+      context, then a global non-numeric flag which was initialised to
+      0 is incremented - and the value assigned is in accordance with
+      perl's usual rules. The arg can be in either integer format,
+      scientific notation, float format or (+-)inf/nan.
+      Doing Math::Decimal64->new($string) will also create and assign
+      using PVtoD64().
+      The nnumflag function returns the current value of the global.
+      It can be cleared to 0 by running clear_nnum() and set to x with
+      set_nnum(x).
       PVtoD64 is now a much improved way of creating and assigning - so
       much so that I'm now recommending it as the preferred way of
       creating a Math::Decimal64 object.
@@ -1481,7 +1483,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
 =head1 OTHER FUNCTIONS
 
-     #################
+     ##################################
      $iv = Math::Decimal64::nnumflag(); # not exported
       Returns the value of the non-numeric flag. This flag is
       initialized to zero, but incemented by 1 whenever the
@@ -1491,12 +1493,12 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       many times _atodecimal() was handed such a string. The flag
       can be reset to 0 by running clear_nnum().
 
-     ##############
+     ###############################
      Math::Decimal64::set_nnum($iv); # not exported
       Resets the global non-numeric flag to the value specified by
       $iv.
 
-     #############
+     ##############################
      Math::Decimal64::clear_nnum(); # not exported
       Resets the global non-numeric flag to 0.(Essentially the same
       as running set_nnum(0).)
