@@ -75,6 +75,9 @@ $Math::Decimal64::nan_str  = unpack("a*", pack( "B*", '011111' . ('0' x 58)));
 $Math::Decimal64::ninf_str = unpack("a*", pack( "B*", '11111'  . ('0' x 59)));
 $Math::Decimal64::pinf_str = unpack("a*", pack( "B*", '01111'  . ('0' x 59)));
 $Math::Decimal64::fmt = d64_fmt();
+$Math::Decimal64::NNW = 0; # set to 1 to enable a non-numeric warning whenever
+                           # a string containing any non-numeric characters is
+                           # treated as a number.
 
 #######################################################################
 #######################################################################
@@ -1215,8 +1218,10 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
       looks_like_number API function) don't make sense in numeric
       context, then a global non-numeric flag which was initialised to
       0 is incremented - and the value assigned is in accordance with
-      perl's usual rules. The arg can be in either integer format,
-      scientific notation, float format or (+-)inf/nan.
+      perl's usual rules. If $Math::Decimal64::NNW (set to 0 by default)
+      is set to 1, then a non-numeric warning is also issued whenever
+      the non-numeric flag is incremented. The arg can be in either
+      integer format, scientific notation, float format or (+-)inf/nan.
       Doing Math::Decimal64->new($string) will also create and assign
       using PVtoD64().
       The nnumflag function returns the current value of the global.
