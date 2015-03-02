@@ -1,5 +1,8 @@
 
 0.14
+ - Add $Math::Decimal64::NNW (set to 0). If this variable is set to 1,
+   then non-numeric warnings will be given whenever a string containing
+   any non-numeric characters is given to Math::Decimal64::_atodecimal().
  - Remove looks_like_number() from _atodecimal
  - No longer export nnumflag(), set_nnum() and clear_nnum().
 
