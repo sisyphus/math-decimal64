@@ -1,3 +1,4 @@
+0.15
 
 0.14
  - Add $Math::Decimal64::NNW (set to 0). If this variable is set to 1,
