@@ -1,4 +1,5 @@
 0.15
+ - Fix overloading of comparison operators when operands are reversed.
 
 0.14
  - Add $Math::Decimal64::NNW (set to 0). If this variable is set to 1,
