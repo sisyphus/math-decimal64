@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Math::Decimal64 qw(:all);
+use Config;
 
 print "1..13\n";
 
@@ -21,6 +22,12 @@ my $ok = '';
 
 $div = Math::Decimal64->new($uv) - 1;
 if($uv != $div) {$ok .= 'a'}
+elsif($Config{ivsize} > 4) {
+  warn "\n Skipping test 1a - the precision of your UV\n",
+       " is greater than the precision of the _Decimal64 type\n",
+       " Usefulness of UV overloading is therefore limited.\n";
+  $ok .= 'a';
+}
 else {warn "\n1a: ", $div, "\n"}
 
 $div = Math::Decimal64->new($iv) + NVtoD64(0.1);
@@ -127,6 +134,12 @@ $ok = '';
 
 $div = Math::Decimal64->new($uv) - 1;
 if($uv > $div) {$ok .= 'a'}
+elsif($Config{ivsize} > 4) {
+  warn "\n Skipping test 4a - the precision of your UV\n",
+       " is greater than the precision of the _Decimal64 type\n",
+       " Usefulness of UV overloading is therefore limited.\n";
+  $ok .= 'a';
+}
 else {warn "\n4a: ", $div, "\n"}
 
 $div = Math::Decimal64->new($iv) - '0.1';
@@ -229,6 +242,12 @@ $ok = '';
 
 $div = Math::Decimal64->new($uv) + 1;
 if($uv < $div) {$ok .= 'a'}
+elsif($Config{ivsize} > 4) {
+  warn "\n Skipping test 7a - the precision of your UV\n",
+       " is greater than the precision of the _Decimal64 type\n",
+       " Usefulness of UV overloading is therefore limited.\n";
+  $ok .= 'a';
+}
 else {warn "\n7a: ", $div, "\n"}
 
 $div = Math::Decimal64->new($iv) + '0.1';
@@ -264,6 +283,12 @@ $ok = '';
 
 $div = Math::Decimal64->new($uv) + 1;
 if(($uv <=> $div) < 0) {$ok .= 'a'}
+elsif($Config{ivsize} > 4) {
+  warn "\n Skipping test 8a - the precision of your UV\n",
+       " is greater than the precision of the _Decimal64 type\n",
+       " Usefulness of UV overloading is therefore limited.\n";
+  $ok .= 'a';
+}
 else {warn "\n8a: ", $div, "\n"}
 
 $div = Math::Decimal64->new($iv) + '0.1';
@@ -296,6 +321,12 @@ $ok = '';
 
 $div = Math::Decimal64->new($uv) - 1;
 if(($uv <=> $div) > 0) {$ok .= 'a'}
+elsif($Config{ivsize} > 4) {
+  warn "\n Skipping test 7a - the precision of your UV\n",
+       " is greater than the precision of the _Decimal64 type\n",
+       " Usefulness of UV overloading is therefore limited.\n";
+  $ok .= 'a';
+}
 else {warn "\n9a: ", $div, "\n"}
 
 $div = Math::Decimal64->new($iv) - '0.1';
