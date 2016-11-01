@@ -182,8 +182,8 @@ _Decimal64 _atodecimal(pTHX_ char * s) {
     negative = -1;
     s++;
   }
-  if(s[0] == '+') {
-    s++;
+  else {
+    if(s[0] == '+') s++;
   }
 
   if((s[0] == 'i' || s[0] == 'I') && (s[1] == 'n' || s[1] == 'N') && (s[2] == 'f' || s[2] == 'F')) {
