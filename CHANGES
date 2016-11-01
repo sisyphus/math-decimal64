@@ -1,5 +1,6 @@
 0.16
  - Replace SvIV/SvUV/SvNV with SvIVX/SvUVX/SvNVX where appropriate
+ - Amend _atodecimal() to correctly handle the case where the string begins with '-+'
 
 0.15
  - Fix overloading of comparison operators when operands are reversed.
