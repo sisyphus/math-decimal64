@@ -111,7 +111,17 @@ int _is_neg_zero(_Decimal64 d64) {
   int n = sizeof(_Decimal64);
   void * p = &d64;
 
-  if(d64 != 0.0DD) return 0;
+  /*****************************************************
+   I've found cases (in Inline::C and XS, but NOT in C)
+   where -0 is evaluated as being less than 0 (which is
+   simply wrong). To ensure that we don't get tripped up
+   by that behaviour we therefore take the ensuing steps,
+   instead of simply checking that d128 != 0.0DL
+  ******************************************************/
+  if(d64 != 0.0DD) {
+    if(d64 * -1.0DD == 0.0DD) return 1; /* it's a -0 */
+    return 0; /* it's not zero */
+  }
 
 #ifdef WE_HAVE_BENDIAN /* Big Endian architecture */
   if(((unsigned char*)p)[0] >= 128) return 1;
