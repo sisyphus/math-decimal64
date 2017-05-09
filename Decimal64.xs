@@ -11,15 +11,8 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#include <stdlib.h>
 
-#ifdef OLDPERL
-#define SvUOK SvIsUV
-#endif
-
-#ifndef Newx
-#  define Newx(v,n,t) New(0,v,n,t)
-#endif
+#include "math_decimal64_include.h"
 
 typedef _Decimal64 D64;
 
