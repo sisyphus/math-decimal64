@@ -105,11 +105,9 @@ int _is_neg_zero(_Decimal64 d64) {
   void * p = &d64;
 
   /*****************************************************
-   I've found cases (in Inline::C and XS, but NOT in C)
-   where -0 is evaluated as being less than 0 (which is
-   simply wrong). To ensure that we don't get tripped up
-   by that behaviour we therefore take the ensuing steps,
-   instead of simply checking that d128 != 0.0DL
+   We perform the following oddness because of gcc's
+   buggy optimization of signed zero _Decimal64.
+   See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80692
   ******************************************************/
   if(d64 != 0.0DD) {
     if(d64 * -1.0DD == 0.0DD) return 1; /* it's a -0 */
