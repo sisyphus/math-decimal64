@@ -1617,7 +1617,7 @@ Math::Decimal64 - perl interface to C's _Decimal64 operations.
 
     This program is free software; you may redistribute it and/or
     modify it under the same terms as Perl itself.
-    Copyright 2012-16 Sisyphus
+    Copyright 2012-17 Sisyphus
 
 =head1 AUTHOR
 
