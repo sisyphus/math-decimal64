@@ -1,3 +1,5 @@
+0.17
+
 0.16
  - Adjust _is_neg_zero() to circumvent gcc optimization bug.
    See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80692
