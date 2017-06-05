@@ -1,4 +1,5 @@
 0.17
+ - "use 5.008;" in Makefile.PL.
 
 0.16
  - Adjust _is_neg_zero() to circumvent gcc optimization bug.
