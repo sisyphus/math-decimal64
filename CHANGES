@@ -1,5 +1,6 @@
 0.17
  - "use 5.008;" in Makefile.PL.
+ - Replace dynamic allocation of string buffers with static allocation.
 
 0.16
  - Adjust _is_neg_zero() to circumvent gcc optimization bug.
