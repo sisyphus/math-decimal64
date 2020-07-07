@@ -16,7 +16,7 @@ our $VERSION = '0.17';
 
 use subs qw(DEC64_MAX DEC64_MIN);
 
-DynaLoader::bootstrap Math::Decimal64 $Math::Decimal64::VERSION;
+Math::Decimal64->DynaLoader::bootstrap($Math::Decimal64::VERSION);
 
 @Math::Decimal64::EXPORT = ();
 @Math::Decimal64::EXPORT_OK = qw(
