@@ -3,6 +3,10 @@ use warnings;
 use Math::Decimal64 qw(:all);
 use Config;
 
+# difining this constant changes PL_sv_yes
+# See: https://github.com/Perl/perl5/issues/19378
+sub _constant_subroutine () { !0 }
+
 print "1..13\n";
 
 my $uv = ~0;
