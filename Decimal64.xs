@@ -826,19 +826,19 @@ SV * _overload_sub(pTHX_ SV * a, SV * b, SV * third) {
      SvREADONLY_on(obj);
 
     if(SvUOK(b)) {
-      if(third == &PL_sv_yes) *d64 = (D64)SvUVX(b) - *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
+      if(SWITCH_ARGS) *d64 = (D64)SvUVX(b) - *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
       else *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) - (D64)SvUVX(b);
       return obj_ref;
     }
 
     if(SvIOK(b)) {
-      if(third == &PL_sv_yes) *d64 = (D64)SvIVX(b) - *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
+      if(SWITCH_ARGS) *d64 = (D64)SvIVX(b) - *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
       else *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) - (D64)SvIVX(b);
       return obj_ref;
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      if(third == &PL_sv_yes) *d64 = _atodecimal(aTHX_ SvPV_nolen(b)) - *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
+      if(SWITCH_ARGS) *d64 = _atodecimal(aTHX_ SvPV_nolen(b)) - *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
       else *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) - _atodecimal(aTHX_ SvPV_nolen(b));
       return obj_ref;
     }
@@ -852,7 +852,7 @@ SV * _overload_sub(pTHX_ SV * a, SV * b, SV * third) {
       croak("Invalid object supplied to Math::Decimal64::_overload_sub function");
     }
     /* replaced by _overload_neg
-    if(third == &PL_sv_yes) {
+    if(SWITCH_ARGS) {
       *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) * -1.0DD;
       return obj_ref;
     }
@@ -893,19 +893,19 @@ SV * _overload_div(pTHX_ SV * a, SV * b, SV * third) {
      SvREADONLY_on(obj);
 
     if(SvUOK(b)) {
-      if(third == &PL_sv_yes) *d64 = (D64)SvUVX(b) / *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
+      if(SWITCH_ARGS) *d64 = (D64)SvUVX(b) / *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
       else *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) / (D64)SvUVX(b);
       return obj_ref;
     }
 
     if(SvIOK(b)) {
-      if(third == &PL_sv_yes) *d64 = (D64)SvIVX(b) / *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
+      if(SWITCH_ARGS) *d64 = (D64)SvIVX(b) / *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
       else *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) / (D64)SvIVX(b);
       return obj_ref;
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      if(third == &PL_sv_yes) *d64 = _atodecimal(aTHX_ SvPV_nolen(b)) / *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
+      if(SWITCH_ARGS) *d64 = _atodecimal(aTHX_ SvPV_nolen(b)) / *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a))));
       else *d64 = *(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) / _atodecimal(aTHX_ SvPV_nolen(b));
       return obj_ref;
     }
@@ -1098,7 +1098,7 @@ SV * _overload_not_equiv(pTHX_ SV * a, SV * b, SV * third) {
 SV * _overload_lt(pTHX_ SV * a, SV * b, SV * third) {
 
      if(SvUOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) > (D64)SvUVX(b)) return newSViv(1);
          return newSViv(0);
        }
@@ -1107,7 +1107,7 @@ SV * _overload_lt(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvIOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) > (D64)SvIVX(b)) return newSViv(1);
          return newSViv(0);
        }
@@ -1116,7 +1116,7 @@ SV * _overload_lt(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) > _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
          return newSViv(0);
        }
@@ -1138,7 +1138,7 @@ SV * _overload_lt(pTHX_ SV * a, SV * b, SV * third) {
 SV * _overload_gt(pTHX_ SV * a, SV * b, SV * third) {
 
     if(SvUOK(b)) {
-      if(third == &PL_sv_yes) {
+      if(SWITCH_ARGS) {
         if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) < (D64)SvUVX(b)) return newSViv(1);
         return newSViv(0);
       }
@@ -1147,7 +1147,7 @@ SV * _overload_gt(pTHX_ SV * a, SV * b, SV * third) {
     }
 
     if(SvIOK(b)) {
-      if(third == &PL_sv_yes) {
+      if(SWITCH_ARGS) {
         if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) < (D64)SvIVX(b)) return newSViv(1);
         return newSViv(0);
       }
@@ -1156,7 +1156,7 @@ SV * _overload_gt(pTHX_ SV * a, SV * b, SV * third) {
     }
 
     if(SvPOK(b) && !SvNOK(b)) {
-      if(third == &PL_sv_yes) {
+      if(SWITCH_ARGS) {
         if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) < _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
         return newSViv(0);
       }
@@ -1178,7 +1178,7 @@ SV * _overload_gt(pTHX_ SV * a, SV * b, SV * third) {
 SV * _overload_lte(pTHX_ SV * a, SV * b, SV * third) {
 
      if(SvUOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) >= (D64)SvUVX(b)) return newSViv(1);
          return newSViv(0);
        }
@@ -1187,7 +1187,7 @@ SV * _overload_lte(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvIOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) >= (D64)SvIVX(b)) return newSViv(1);
          return newSViv(0);
        }
@@ -1196,7 +1196,7 @@ SV * _overload_lte(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) >= _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
          return newSViv(0);
        }
@@ -1218,7 +1218,7 @@ SV * _overload_lte(pTHX_ SV * a, SV * b, SV * third) {
 SV * _overload_gte(pTHX_ SV * a, SV * b, SV * third) {
 
      if(SvUOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) <= (D64)SvUVX(b)) return newSViv(1);
          return newSViv(0);
        }
@@ -1227,7 +1227,7 @@ SV * _overload_gte(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvIOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) <= (D64)SvIVX(b)) return newSViv(1);
          return newSViv(0);
        }
@@ -1236,7 +1236,7 @@ SV * _overload_gte(pTHX_ SV * a, SV * b, SV * third) {
      }
 
      if(SvPOK(b) && !SvNOK(b)) {
-       if(third == &PL_sv_yes) {
+       if(SWITCH_ARGS) {
          if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) <= _atodecimal(aTHX_ SvPV_nolen(b))) return newSViv(1);
          return newSViv(0);
        }
@@ -1257,7 +1257,7 @@ SV * _overload_gte(pTHX_ SV * a, SV * b, SV * third) {
 
 SV * _overload_spaceship(pTHX_ SV * a, SV * b, SV * third) {
     int reversal = 1;
-    if(third == &PL_sv_yes) reversal = -1;
+    if(SWITCH_ARGS) reversal = -1;
 
     if(SvUOK(b)) {
       if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) > (D64)SvUVX(b)) return newSViv(1 * reversal);
