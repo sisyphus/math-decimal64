@@ -1,7 +1,4 @@
 
-#include <math.h>
-#include <stdlib.h>
-
 #ifdef OLDPERL
 #define SvUOK SvIsUV
 #endif
