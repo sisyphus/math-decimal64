@@ -18,8 +18,7 @@ use subs qw(DEC64_MAX DEC64_MIN);
 
 Math::Decimal64->DynaLoader::bootstrap($Math::Decimal64::VERSION);
 
-@Math::Decimal64::EXPORT = ();
-@Math::Decimal64::EXPORT_OK = qw(
+my @tagged = qw(
     MEtoD64 UVtoD64 IVtoD64 NVtoD64 PVtoD64 STRtoD64 D64toME D64toNV
     FR64toME pFR D64toFSTR D64toRSTR
     InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
@@ -30,16 +29,9 @@ Math::Decimal64->DynaLoader::bootstrap($Math::Decimal64::VERSION);
     get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
     );
 
-%Math::Decimal64::EXPORT_TAGS = (all => [qw(
-    MEtoD64 UVtoD64 IVtoD64 NVtoD64 PVtoD64 STRtoD64 D64toME D64toNV
-    FR64toME pFR D64toFSTR D64toRSTR
-    InfD64 NaND64 UnityD64 ZeroD64 is_InfD64 is_NaND64 is_ZeroD64
-    D64toLD LDtoD64 DEC64_MAX DEC64_MIN
-    assignME assignInf assignNaN assignPV Exp10 have_strtod64
-    assignIV assignUV assignNV assignD64
-    decode_d64 decode_bid decode_dpd d64_bytes hex2bin d64_fmt
-    get_sign get_exp PVtoME MEtoPV assignDPD DPDtoD64
-    )]);
+@Math::Decimal64::EXPORT = ();
+@Math::Decimal64::EXPORT_OK = @tagged;
+%Math::Decimal64::EXPORT_TAGS = (all => \@tagged);
 
 use overload
   '+'     => \&_overload_add,
