@@ -6,6 +6,7 @@ Decimal64.pod
 Decimal64.xs
 Makefile.PL
 math_decimal64_include.h
+math_decimal64_unused.h
 t/aab_basic.t
 t/boundaries.t
 t/conv.t

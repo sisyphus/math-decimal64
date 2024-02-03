@@ -13,6 +13,7 @@
 
 
 #include "math_decimal64_include.h"
+#include "math_decimal64_unused.h"
 
 typedef _Decimal64 D64;
 
@@ -588,6 +589,7 @@ SV * STRtoD64(pTHX_ char * x) {
      SvREADONLY_on(obj);
      return obj_ref;
 #else
+     PERL_UNUSED_ARG(x);
      croak("The strtod64 function has not been made available");
 #endif
 }
@@ -735,6 +737,7 @@ SV * _overload_add(pTHX_ SV * a, SV * b, SV * third) {
 
      _Decimal64 * d64;
      SV * obj_ref, * obj;
+     PERL_UNUSED_ARG(third);
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in _overload_add function");
@@ -775,6 +778,7 @@ SV * _overload_mul(pTHX_ SV * a, SV * b, SV * third) {
 
      _Decimal64 * d64;
      SV * obj_ref, * obj;
+     PERL_UNUSED_ARG(third);
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in _overload_mul function");
@@ -864,6 +868,7 @@ SV * _overload_neg(pTHX_ SV * a, SV * b, SV * third) {
 
      _Decimal64 * d64;
      SV * obj_ref, * obj;
+     PERL_UNUSED_ARG2(b, third);
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in _overload_sub function");
@@ -922,6 +927,7 @@ SV * _overload_div(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG(third);
 
      SvREFCNT_inc(a);
 
@@ -952,6 +958,7 @@ SV * _overload_add_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG(third);
 
      SvREFCNT_inc(a);
 
@@ -982,6 +989,7 @@ SV * _overload_mul_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG(third);
 
      SvREFCNT_inc(a);
 
@@ -1012,6 +1020,7 @@ SV * _overload_sub_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG(third);
 
      SvREFCNT_inc(a);
 
@@ -1042,6 +1051,7 @@ SV * _overload_div_eq(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_equiv(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG(third);
 
      if(SvUOK(b)) {
        if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) == (D64)SvUVX(b)) return newSViv(1);
@@ -1069,6 +1079,7 @@ SV * _overload_equiv(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_not_equiv(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG(third);
 
      if(SvUOK(b)) {
        if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) != (D64)SvUVX(b)) return newSViv(1);
@@ -1297,6 +1308,7 @@ SV * _overload_copy(pTHX_ SV * a, SV * b, SV * third) {
 
      _Decimal64 * d64;
      SV * obj_ref, * obj;
+     PERL_UNUSED_ARG2(b, third);
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in _overload_copy function");
@@ -1335,6 +1347,7 @@ SV * D64toD64(pTHX_ SV * a) {
 }
 
 SV * _overload_true(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG2(b, third);
 
      if(_is_nan(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))))) return newSViv(0);
      if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) != 0.0DD) return newSViv(1);
@@ -1342,6 +1355,7 @@ SV * _overload_true(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 SV * _overload_not(pTHX_ SV * a, SV * b, SV * third) {
+     PERL_UNUSED_ARG2(b, third);
      if(_is_nan(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))))) return newSViv(1);
      if(*(INT2PTR(_Decimal64 *, SvIVX(SvRV(a)))) != 0.0DD) return newSViv(0);
      return newSViv(1);
@@ -1351,6 +1365,7 @@ SV * _overload_abs(pTHX_ SV * a, SV * b, SV * third) {
 
      _Decimal64 * d64;
      SV * obj_ref, * obj;
+     PERL_UNUSED_ARG2(b, third);
 
      Newx(d64, 1, _Decimal64);
      if(d64 == NULL) croak("Failed to allocate memory in _overload_abs function");
@@ -1367,10 +1382,12 @@ SV * _overload_abs(pTHX_ SV * a, SV * b, SV * third) {
 }
 
 void _overload_inc(pTHX_ SV * p, SV * second, SV * third) {
+     PERL_UNUSED_ARG2(second, third);
      *(INT2PTR(_Decimal64 *, SvIVX(SvRV(p)))) += 1.0DD;
 }
 
 void _overload_dec(pTHX_ SV * p, SV * second, SV * third) {
+     PERL_UNUSED_ARG2(second, third);
      *(INT2PTR(_Decimal64 *, SvIVX(SvRV(p)))) -= 1.0DD;
 }
 
@@ -1429,6 +1446,7 @@ void _d64_bytes(pTHX_ SV * sv) {
   int i, n = sizeof(_Decimal64);
   char buff[4];
   void * p = &d64;
+  PERL_UNUSED_VAR(items);
 
   sp = mark;
 
@@ -1451,6 +1469,7 @@ void _bid_mant(pTHX_ SV * bin) {
   char buf[21];
   long long val = 0ll;
   extern long long add_on[54];
+  PERL_UNUSED_VAR(items);
 
   for(i = 0; i <= imax; i++)
     if(SvIV(*(av_fetch((AV*)SvRV(bin), i, 0)))) val += add_on[i];

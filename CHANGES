@@ -1,5 +1,6 @@
 0.18
  - Simplify overloading of '++' and '--'.
+ - Silence pointless warnings.
 
 0.17
  - Fix https://github.com/sisyphus/math-decimal64/pull/1
